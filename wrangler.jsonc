@@ -1,0 +1,11 @@
+{
+  "name": "northcity-rulebook",
+  "compatibility_date": "2026-08-12",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "north-city-db",
+      "database_id": "117dd489-c53d-40e5-9ff3-112b21093b93"
+    }
+  ]
+}

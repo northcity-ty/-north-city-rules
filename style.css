@@ -559,3 +559,47 @@ button,input{font:inherit}
   .gallery-grid{grid-template-columns:1fr}
   .hero-actions .button{width:100%}
 }
+
+
+/* Ver.3: emoji only for rule category cards */
+.rule-icon{
+  display:block;
+  margin-bottom:7px;
+  font-size:26px;
+  line-height:1;
+}
+.rule-card > span:not(.rule-icon){
+  color:var(--muted);
+  font-size:11px;
+}
+
+/* Official X section */
+.social-panel{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  padding:24px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:20px;
+  box-shadow:0 8px 24px rgba(47,145,178,.08);
+}
+.social-panel strong{
+  display:block;
+  margin-bottom:4px;
+  color:var(--blue-deep);
+  font-size:18px;
+}
+.social-panel p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+}
+@media (max-width:680px){
+  .social-panel{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .social-panel .button{width:100%}
+}
