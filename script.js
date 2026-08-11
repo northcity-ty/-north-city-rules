@@ -1,1 +1,34 @@
-const menu=document.getElementById('menu'),nav=document.getElementById('nav');menu.addEventListener('click',()=>nav.classList.toggle('open'));nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>nav.classList.remove('open')));const input=document.getElementById('ruleSearch'),cards=[...document.querySelectorAll('.rule-grid button')],none=document.getElementById('none');input.addEventListener('input',()=>{const q=input.value.trim().toLowerCase();let visible=0;cards.forEach(card=>{const hay=(card.textContent+' '+card.dataset.keywords).toLowerCase();const show=!q||hay.includes(q);card.style.display=show?'grid':'none';if(show)visible++});none.style.display=visible?'none':'block'});
+const menuToggle = document.getElementById("menuToggle");
+const mainNav = document.getElementById("mainNav");
+
+menuToggle?.addEventListener("click", () => {
+  const open = mainNav.classList.toggle("open");
+  menuToggle.setAttribute("aria-expanded", String(open));
+});
+
+mainNav?.querySelectorAll("a").forEach(link => {
+  link.addEventListener("click", () => {
+    mainNav.classList.remove("open");
+    menuToggle?.setAttribute("aria-expanded", "false");
+  });
+});
+
+const searchInput = document.getElementById("ruleSearch");
+const ruleCards = [...document.querySelectorAll(".rule-card")];
+const noResults = document.getElementById("noResults");
+
+searchInput?.addEventListener("input", () => {
+  const query = searchInput.value.trim().toLowerCase();
+  let visible = 0;
+
+  ruleCards.forEach(card => {
+    const text = `${card.textContent} ${card.dataset.keywords || ""}`.toLowerCase();
+    const match = !query || text.includes(query);
+    card.style.display = match ? "" : "none";
+    if (match) visible++;
+  });
+
+  if (noResults) {
+    noResults.style.display = visible ? "none" : "block";
+  }
+});
