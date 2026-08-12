@@ -1,88 +1,15 @@
-const menuToggle = document.getElementById("menuToggle");
-const mainNav = document.getElementById("mainNav");
-
-menuToggle?.addEventListener("click", () => {
-  const open = mainNav.classList.toggle("open");
-  menuToggle.setAttribute("aria-expanded", String(open));
-});
-
-mainNav?.querySelectorAll("a").forEach(link => {
-  link.addEventListener("click", () => {
-    mainNav.classList.remove("open");
-    menuToggle?.setAttribute("aria-expanded", "false");
-  });
-});
-
-const searchInput = document.getElementById("ruleSearch");
-const ruleGrid = document.getElementById("ruleGrid");
-const noResults = document.getElementById("noResults");
-
-let searchableCards = [];
-
-function escapeHtml(value = "") {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function createRuleCard(rule) {
-  const card = document.createElement("a");
-  card.className = "rule-card";
-  card.href = `#rule-${rule.slug}`;
-  card.dataset.keywords = [rule.category, rule.title, rule.summary, rule.content]
-    .filter(Boolean).join(" ");
-
-  card.innerHTML = `
-    <span class="rule-icon" aria-hidden="true">📘</span>
-    <strong>${escapeHtml(rule.title)}</strong>
-    <span>${escapeHtml(rule.summary || rule.category || "ルール")}</span>
-  `;
-
-  return card;
-}
-
-function updateSearch() {
-  const query = searchInput?.value.trim().toLowerCase() || "";
-  let visible = 0;
-
-  searchableCards.forEach(card => {
-    const text = `${card.textContent} ${card.dataset.keywords || ""}`.toLowerCase();
-    const match = !query || text.includes(query);
-    card.style.display = match ? "" : "none";
-    if (match) visible++;
-  });
-
-  if (noResults) noResults.style.display = visible ? "none" : "block";
-}
-
-async function loadRulesFromDatabase() {
-  if (!ruleGrid) return;
-
-  try {
-    const response = await fetch("/api/rules", { cache: "no-store" });
-    const data = await response.json();
-
-    if (!response.ok || !data.ok || !Array.isArray(data.rules) || data.rules.length === 0) {
-      throw new Error("DB rules not available");
-    }
-
-    ruleGrid.innerHTML = "";
-    data.rules.forEach(rule => ruleGrid.appendChild(createRuleCard(rule)));
-
-    searchableCards = [...ruleGrid.querySelectorAll(".rule-card")];
-    updateSearch();
-  } catch (error) {
-    console.warn("DBルールを読み込めませんでした。", error);
-    searchableCards = [...ruleGrid.querySelectorAll(".rule-card")];
-    updateSearch();
-  }
-}
-
-searchInput?.addEventListener("input", updateSearch);
-
-searchableCards = [...document.querySelectorAll(".rule-card")];
-updateSearch();
-loadRulesFromDatabase();
+const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const menu=$('menuToggle'),nav=$('mainNav');menu?.addEventListener('click',()=>{let o=nav.classList.toggle('open');menu.setAttribute('aria-expanded',o)});nav?.querySelectorAll('a').forEach(a=>a.onclick=()=>nav.classList.remove('open'));
+let rules=[],cats=[],activeMajor=null;const labels={normal:'通常',note:'補足',caution:'注意',important:'重要',prohibited:'禁止'};
+function majorNames(){let a=cats.filter(c=>!c.parent_id&&c.is_published).sort((a,b)=>a.sort_order-b.sort_order).map(c=>({title:c.title,icon:c.icon||'📘',id:c.id}));for(let r of rules)if(!a.some(x=>x.title===r.major_category))a.push({title:r.major_category,icon:'📘',id:null});return a.filter(x=>x.title)}
+function subsFor(m){let mc=cats.find(c=>!c.parent_id&&c.title===m);let a=mc?cats.filter(c=>+c.parent_id===+mc.id&&c.is_published).sort((x,y)=>x.sort_order-y.sort_order).map(c=>c.title):[];for(let r of rules.filter(x=>x.major_category===m))if(r.sub_category&&!a.includes(r.sub_category))a.push(r.sub_category);return a}
+function renderHome(){activeMajor=null;let grid=$('ruleGrid');grid.innerHTML='';majorNames().forEach(m=>{let count=rules.filter(r=>r.major_category===m.title).length,b=document.createElement('button');b.className='rule-card category-card';b.innerHTML=`<span class="rule-icon">${esc(m.icon)}</span><strong>${esc(m.title)}</strong><span>${count}件のルール　›</span>`;b.onclick=()=>renderMajor(m.title);grid.append(b)});$('noResults').style.display='none'}
+function renderMajor(m){activeMajor=m;let grid=$('ruleGrid'),subs=subsFor(m);grid.innerHTML=`<button class="rule-back" id="ruleBack">← 大タイトル一覧へ</button><div class="rule-section-title"><span>RULE BOOK</span><h3>${esc(m)}</h3></div>`;$('ruleBack').onclick=renderHome;if(!subs.length)renderRuleList(grid,rules.filter(r=>r.major_category===m));else{subs.forEach(s=>{let box=document.createElement('section');box.className='sub-category';box.innerHTML=`<button class="sub-title"><strong>${esc(s)}</strong><span>${rules.filter(r=>r.major_category===m&&r.sub_category===s).length}件　›</span></button><div class="compact-rules" hidden></div>`;let list=box.querySelector('.compact-rules');renderRuleList(list,rules.filter(r=>r.major_category===m&&r.sub_category===s));box.querySelector('.sub-title').onclick=()=>list.hidden=!list.hidden;grid.append(box)});let loose=rules.filter(r=>r.major_category===m&&!r.sub_category);if(loose.length){let box=document.createElement('div');box.className='compact-rules loose';renderRuleList(box,loose);grid.append(box)}}}
+function renderRuleList(box,arr){arr.sort((a,b)=>a.sort_order-b.sort_order||a.id-b.id).forEach(r=>{let b=document.createElement('button');b.className=`compact-rule type-${r.display_type}`;let fresh=r.new_until&&new Date(r.new_until)>new Date();b.innerHTML=`<span><small>${esc(labels[r.display_type]||'通常')}</small><strong>${esc(r.title)}</strong></span>${fresh?'<em>更新</em>':''}<b>›</b>`;b.onclick=()=>openRule(r);box.append(b)})}
+function openRule(r){let d=$('ruleDialog');$('ruleBreadcrumb').textContent=`TOP ＞ ${r.major_category}${r.sub_category?' ＞ '+r.sub_category:''}`;$('ruleDetail').innerHTML=`<div class="detail-meta"><span class="detail-tag type-${r.display_type}">${esc(labels[r.display_type]||'通常')}</span>${r.updated_at?`<time>${esc(r.updated_at.slice(0,10))} 更新</time>`:''}</div><h2>${esc(r.title)}</h2><div class="detail-content">${esc(r.content).replace(/\n/g,'<br>')}</div>${r.details?`<details ${r.details_collapsed?'':'open'}><summary>詳しく見る</summary><div>${esc(r.details).replace(/\n/g,'<br>')}</div></details>`:''}<button class="copy-link" id="copyRuleLink">このルールのリンクをコピー</button>`;history.replaceState(null,'',`#rule-${r.slug}`);d.showModal();$('copyRuleLink').onclick=async()=>{await navigator.clipboard.writeText(location.href);$('copyRuleLink').textContent='コピーしました'} }
+$('closeRule').onclick=()=>{$('ruleDialog').close();history.replaceState(null,'','#rules')};
+function search(){let q=$('ruleSearch').value.trim().toLowerCase(),sug=$('searchSuggestions');if(!q){sug.hidden=true;renderHome();return}let hits=rules.filter(r=>[r.title,r.major_category,r.sub_category,r.content,r.details,r.keywords].join(' ').toLowerCase().includes(q));let grid=$('ruleGrid');grid.innerHTML=`<div class="search-result-head"><button class="rule-back" id="ruleBack">← カテゴリー一覧へ</button><strong>「${esc(q)}」の検索結果：${hits.length}件</strong></div>`;$('ruleBack').onclick=()=>{$('ruleSearch').value='';renderHome()};renderRuleList(grid,hits);sug.innerHTML=hits.slice(0,6).map(r=>`<button data-id="${r.id}"><strong>${esc(r.title)}</strong><small>${esc(r.major_category)}${r.sub_category?' ＞ '+esc(r.sub_category):''}</small></button>`).join('');sug.hidden=!hits.length;sug.querySelectorAll('button').forEach(b=>b.onclick=()=>openRule(rules.find(r=>+r.id===+b.dataset.id)));let no=$('noResults');no.style.display=hits.length?'none':'block';if(!hits.length)$('noResultCategories').innerHTML=majorNames().map(m=>`<button>${esc(m.title)}</button>`).join(' ');$('noResultCategories').querySelectorAll('button').forEach((b,i)=>b.onclick=()=>{ $('ruleSearch').value='';renderMajor(majorNames()[i].title)})}
+$('ruleSearch')?.addEventListener('input',search);document.addEventListener('click',e=>{if(!e.target.closest('.search-box'))$('searchSuggestions').hidden=true});
+async function load(){try{let [rr,cc,uu]=await Promise.all([fetch('/api/rules',{cache:'no-store'}),fetch('/api/categories',{cache:'no-store'}),fetch('/api/updates',{cache:'no-store'})]);rules=(await rr.json()).rules||[];cats=(await cc.json()).categories||[];renderHome();renderUpdates((await uu.json()).updates||[]);let m=location.hash.match(/^#rule-(.+)$/);if(m){let r=rules.find(x=>x.slug===m[1]);if(r)openRule(r)}}catch(e){$('ruleGrid').innerHTML='<p class="no-results" style="display:block">ルールを読み込めませんでした。</p>'}}
+function renderUpdates(updates){let names=['すべて',...new Set(updates.map(x=>x.category).filter(Boolean))],f=$('updateFilters');f.innerHTML=names.map((n,i)=>`<button class="${i?'':'active'}">${esc(n)}</button>`).join('');let draw=n=>{$('updateList').innerHTML=updates.filter(x=>n==='すべて'||x.category===n).map(x=>`<article class="update-item"><div><time>${esc((x.created_at||'').slice(0,10))}</time><span>${esc(x.category||'お知らせ')}</span></div><h3>${esc(x.title)}</h3><p>${esc(x.description||'')}</p>${x.old_content||x.new_content?`<details><summary>変更内容を見る</summary>${x.old_content?`<div class="change-before"><strong>変更前</strong><p>${esc(x.old_content)}</p></div>`:''}${x.new_content?`<div class="change-after"><strong>変更後</strong><p>${esc(x.new_content)}</p></div>`:''}</details>`:''}</article>`).join('')||'<p class="no-results" style="display:block">変更履歴はありません。</p>'};f.querySelectorAll('button').forEach(b=>b.onclick=()=>{f.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');draw(b.textContent)});draw('すべて')}
+let topBtn=$('backToTop');addEventListener('scroll',()=>topBtn.classList.toggle('show',scrollY>500));topBtn.onclick=()=>scrollTo({top:0,behavior:'smooth'});load();

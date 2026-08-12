@@ -33,9 +33,10 @@
         <div>
           <p class="eyebrow">RULE MANAGER</p>
           <h1>ルール管理</h1>
-          <p class="help">カテゴリを選んで、タイトルと本文を書けば基本の登録は完了です。</p>
+          <p class="help">大タイトル → 中タイトル → 個別ルールの順に整理できます。順番はあとから変更できます。</p>
         </div>
         <div class="action-row">
+          <button id="categoryButton" class="button secondary">カテゴリ管理</button>
           <button id="newRuleButton" class="button primary">＋ 新しいルール</button>
           <button id="logoutButton" class="button secondary">ログアウト</button>
         </div>
@@ -63,47 +64,13 @@
             <input id="ruleId" type="hidden">
 
             <div class="form-grid two">
-              <label class="field">
-                <span>どこに載せる？</span>
-                <select id="category" required>
-                  <option value="">選択してください</option>
-                  <option>初心者向け</option>
-                  <option>基本ルール</option>
-                  <option>RPルール</option>
-                  <option>禁止行為</option>
-                  <option>犯罪ルール</option>
-                  <option>ギャング・抗争</option>
-                  <option>罪状・罰則</option>
-                  <option>白市民</option>
-                  <option>店舗・会社</option>
-                  <option>警察</option>
-                  <option>EMS</option>
-                  <option>メカニック</option>
-                  <option>運営チーム規約</option>
-                </select>
-                <small>ルールが表示されるカテゴリです。</small>
-              </label>
-
-              <label class="field">
-                <span>どれくらい重要？</span>
-                <select id="displayType">
-                  <option value="normal">通常</option>
-                  <option value="note">補足</option>
-                  <option value="caution">注意</option>
-                  <option value="important">重要</option>
-                  <option value="prohibited">禁止</option>
-                </select>
-              </label>
+              <label class="field"><span>大タイトル</span><select id="majorCategory" required><option value="">選択してください</option></select><small>例：犯罪ルール、基本ルール</small></label>
+              <label class="field"><span>中タイトル</span><select id="subCategory"><option value="">中タイトルなし</option></select><small>例：人質、逃走、ダウン・蘇生</small></label>
             </div>
-
+            <label class="field"><span>どれくらい重要？</span><select id="displayType"><option value="normal">通常</option><option value="note">補足</option><option value="caution">注意</option><option value="important">重要</option><option value="prohibited">禁止</option></select></label>
             <label class="field">
               <span>ルールの名前</span>
               <input id="title" required maxlength="200" placeholder="例：外部情報の利用について">
-            </label>
-
-            <label class="field">
-              <span>短い説明</span>
-              <input id="summary" maxlength="500" placeholder="一覧や検索結果に表示する短い説明">
             </label>
 
             <label class="field">
@@ -150,10 +117,7 @@
                   <input id="keywords" placeholder="例：PD ポリス 警官">
                 </label>
                 <div class="form-grid two">
-                  <label class="field">
-                    <span>並び順</span>
-                    <input id="sortOrder" type="number" value="0">
-                  </label>
+                  <div class="field"><span>並び順</span><small>登録済みルール一覧の ↑ ↓ ボタンで変更できます。</small></div>
                   <label class="field">
                     <span>固定URL用ID</span>
                     <input id="slug" placeholder="空欄なら自動作成">
@@ -184,7 +148,7 @@
 
             <div class="save-bar">
               <div>
-                <button id="historyButton" type="button" class="button secondary" disabled>変更履歴</button>
+                <button id="duplicateButton" type="button" class="button secondary" disabled>複製</button>
                 <button id="retireButton" type="button" class="button danger" disabled>このルールを廃止</button>
               </div>
               <button type="submit" class="button primary big">保存する</button>
@@ -203,6 +167,15 @@
     <div id="historyList" class="history-list"></div>
   </dialog>
 
-  <script src="admin.js?v=1"></script>
+
+  <dialog id="categoryDialog">
+    <div class="dialog-head"><strong>カテゴリ管理</strong><button id="closeCategory" class="icon-button">×</button></div>
+    <div class="category-manager">
+      <p class="help">大タイトル・中タイトルを追加できます。↑↓で表示順を変更します。</p>
+      <div class="category-add"><input id="categoryTitle" placeholder="カテゴリ名"><input id="categoryIcon" placeholder="絵文字" maxlength="8"><select id="categoryParent"><option value="">大タイトルとして追加</option></select><button id="addCategory" class="button primary">追加</button></div>
+      <div id="categoryList"></div>
+    </div>
+  </dialog>
+  <script src="admin.js?v=2"></script>
 </body>
 </html>

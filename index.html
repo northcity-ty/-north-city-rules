@@ -24,6 +24,7 @@
       <a href="#about">North Cityについて</a>
       <a href="#join">参加方法</a>
       <a href="#rules">ルール</a>
+      <a href="#updates">変更履歴</a>
       <a href="#faq">FAQ</a>
       <a href="#gallery">ギャラリー</a>
       <a class="nav-discord" href="https://discord.gg/hsH6jr42W" target="_blank" rel="noopener">Discordに参加</a>
@@ -198,26 +199,22 @@
 
       <div class="search-box">
         <span class="search-icon" aria-hidden="true"></span>
-        <input id="ruleSearch" type="search" placeholder="例：人質、犯罪、警察、店舗..." autocomplete="off">
+        <input id="ruleSearch" type="search" placeholder="例：人質、犯罪、警察、店舗..." autocomplete="off" aria-autocomplete="list">
+        <div id="searchSuggestions" class="search-suggestions" hidden></div>
       </div>
 
-      <div class="rule-grid" id="ruleGrid">
-        <a class="rule-card" data-keywords="基本 共通 市民 住民" href="#rules"><span class="rule-icon" aria-hidden="true">🏙️</span><strong>基本ルール</strong><span>すべての住民</span></a>
-        <a class="rule-card" data-keywords="RP ロールプレイ メタ 外部情報" href="#rules"><span class="rule-icon" aria-hidden="true">🎭</span><strong>RPルール</strong><span>RP・メタ関連</span></a>
-        <a class="rule-card" data-keywords="犯罪 強盗 人質 逃走 ダウン" href="#rules"><span class="rule-icon" aria-hidden="true">🔫</span><strong>犯罪ルール</strong><span>犯罪・人質・逃走</span></a>
-        <a class="rule-card" data-keywords="ギャング 抗争 組織" href="#rules"><span class="rule-icon" aria-hidden="true">👥</span><strong>ギャング</strong><span>組織・抗争</span></a>
-        <a class="rule-card" data-keywords="店舗 会社 開業 営業 ライセンス" href="#rules"><span class="rule-icon" aria-hidden="true">🏪</span><strong>店舗・会社</strong><span>営業・開業</span></a>
-        <a class="rule-card" data-keywords="白市民 ライセンス" href="#rules"><span class="rule-icon" aria-hidden="true">🤍</span><strong>白市民</strong><span>白市民向け</span></a>
-        <a class="rule-card" data-keywords="警察 PD パトロール 犯罪対応" href="#rules"><span class="rule-icon" aria-hidden="true">👮</span><strong>警察</strong><span>Police</span></a>
-        <a class="rule-card" data-keywords="EMS 救急 治療 蘇生" href="#rules"><span class="rule-icon" aria-hidden="true">🚑</span><strong>EMS</strong><span>救急・医療</span></a>
-        <a class="rule-card" data-keywords="メカニック 修理 整備 車両" href="#rules"><span class="rule-icon" aria-hidden="true">🔧</span><strong>メカニック</strong><span>修理・整備</span></a>
-        <a class="rule-card" data-keywords="運営 規約 スタッフ" href="#rules"><span class="rule-icon" aria-hidden="true">⚙️</span><strong>運営チーム規約</strong><span>運営について</span></a>
-      </div>
+      <div class="rule-grid" id="ruleGrid"><p class="loading-rules">ルールを読み込んでいます…</p></div>
 
-      <p class="no-results" id="noResults">該当するカテゴリーがありません。</p>
+      <div class="no-results" id="noResults"><strong>該当するルールが見つかりませんでした。</strong><p>別の言葉で検索するか、下のカテゴリーから探してみてください。</p><div id="noResultCategories"></div></div>
       <div class="center-action">
         <a class="button button-secondary" href="#rules">ルール一覧を見る</a>
       </div>
+    </div>
+  </section>
+
+  <section class="section section-blue" id="updates">
+    <div class="container"><div class="section-heading centered"><div><p class="eyebrow">CHANGE LOG</p><h2>変更履歴</h2><p class="section-description">最近追加・変更・廃止されたルールを確認できます。</p></div></div>
+      <div id="updateFilters" class="update-filters"></div><div id="updateList" class="update-list"></div>
     </div>
   </section>
 
@@ -316,6 +313,7 @@
     <div class="footer-links">
       <a href="#news">お知らせ</a>
       <a href="#rules">ルール</a>
+      <a href="#updates">変更履歴</a>
       <a href="#join">参加方法</a>
       <a href="#faq">FAQ</a>
       <a href="https://discord.gg/hsH6jr42W" target="_blank" rel="noopener">Discord</a>
