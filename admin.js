@@ -1,5 +1,5 @@
 const $=id=>document.getElementById(id);let token=localStorage.getItem("northcity_admin_token")||"",name=localStorage.getItem("northcity_admin_name")||"",rules=[],majors=[],middles=[],current=null,dirty=false,majorEdit=null,middleEdit=null;
-const api=(p,o={})=>{const h=new Headers(o.headers||{});h.set("x-admin-token",token);h.set("x-admin-name",name);if(o.body&&!(o.body instanceof FormData))h.set("content-type","application/json");return fetch(p,{...o,headers:h,cache:"no-store"})},esc=s=>String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+const api=(p,o={})=>{const h=new Headers(o.headers||{});h.set("x-admin-token",token);h.set("x-admin-name",encodeURIComponent(name));if(o.body&&!(o.body instanceof FormData))h.set("content-type","application/json");return fetch(p,{...o,headers:h,cache:"no-store"})},esc=s=>String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
 function page(p){if(dirty&&!confirm("未保存の変更があります。移動しますか？"))return;dirty=false;document.querySelectorAll(".admin-page").forEach(x=>x.hidden=x.id!==`${p}Page`);$("homeButton").hidden=p==="home";const t={home:["管理トップ","変更したいものを選んでください。"],rules:["ルール管理","ルール・カテゴリ・必読・履歴を管理します。"],images:["画像管理","サイトに表示する画像を管理します。"],news:["お知らせ管理","お知らせを追加・編集します。"],faq:["FAQ管理","よくある質問を管理します。"],settings:["サイト設定","サイトの基本情報を変更します。"]}[p];$("pageTitle").textContent=t[0];$("pageHelp").textContent=t[1];if(p==="images")loadImages();if(p==="news")loadNews();if(p==="faq")loadFaq();if(p==="settings")loadSettings()}
 document.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>page(b.dataset.page));$("homeButton").onclick=()=>page("home");
 async function refresh(){const [a,b,c]=await Promise.all([api("/api/admin/rules"),api("/api/admin/majors"),api("/api/admin/middles")]),[x,y,z]=await Promise.all([a.json(),b.json(),c.json()]);rules=x.rules||[];majors=y.majors||[];middles=z.middles||[];opts();renderRules();renderMajors();renderMiddles()}
@@ -28,72 +28,6 @@ $("faqSave").onclick=async()=>{const id=$("faqId").value,b={category:$("faqCateg
 async function loadSettings(){const j=await (await api("/api/admin/settings")).json(),s=j.settings||{};$("setSeason").value=s.season||"";$("setSeasonNote").value=s.season_note||"";$("setOpen").value=s.open_time||"";$("setRestart").value=s.restart_time||"";$("setCrime").value=s.crime_time||"";$("setCrimeNote").value=s.crime_note||"";$("setDiscord").value=s.discord_url||"";$("setX").value=s.x_url||"";$("setHeroTitle").value=s.hero_title||"";$("setHeroCopy").value=s.hero_copy||"";$("setNoticeEnabled").checked=s.important_notice_enabled==="1";$("setNoticeText").value=s.important_notice_text||""}
 $("settingsSave").onclick=async()=>{const b={season:$("setSeason").value,season_note:$("setSeasonNote").value,open_time:$("setOpen").value,restart_time:$("setRestart").value,crime_time:$("setCrime").value,crime_note:$("setCrimeNote").value,discord_url:$("setDiscord").value,x_url:$("setX").value,hero_title:$("setHeroTitle").value,hero_copy:$("setHeroCopy").value,important_notice_enabled:$("setNoticeEnabled").checked?"1":"0",important_notice_text:$("setNoticeText").value};await api("/api/admin/settings",{method:"PUT",body:JSON.stringify(b)});alert("保存しました。")};
 function show(t,h){$("dialogTitle").textContent=t;$("dialogBody").innerHTML=h;$("dialog").showModal()}$("dialogClose").onclick=()=>$("dialog").close();window.addEventListener("beforeunload",e=>{if(dirty){e.preventDefault();e.returnValue=""}});
-async function login(){
-  const button=$("loginButton");
-  token=$("adminToken").value.trim();
-  name=$("adminName").value.trim()||"運営";
-
-  if(!token){
-    $("loginMessage").textContent="管理パスワードを入力してください。";
-    return;
-  }
-
-  const originalText=button.textContent;
-  button.disabled=true;
-  button.textContent="確認中…";
-  $("loginMessage").textContent="サーバーに接続して確認しています…";
-
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),12000);
-
-  try{
-    const headers=new Headers();
-    headers.set("x-admin-token",token);
-    headers.set("x-admin-name",name);
-
-    const r=await fetch("/api/admin/check",{
-      headers,
-      cache:"no-store",
-      signal:controller.signal
-    });
-
-    if(r.status===401){
-      $("loginMessage").textContent="管理パスワードが違います。";
-      return;
-    }
-
-    if(!r.ok){
-      $("loginMessage").textContent=`サーバー側でエラーが発生しました（${r.status}）。`;
-      return;
-    }
-
-    $("loginMessage").textContent="ログイン成功。管理画面を読み込んでいます…";
-    localStorage.setItem("northcity_admin_token",token);
-    localStorage.setItem("northcity_admin_name",name);
-
-    $("loginView").hidden=true;
-    $("adminView").hidden=false;
-
-    await refresh();
-    resetRule();
-
-    try{
-      const d=await (await api("/api/admin/dashboard")).json();
-      $("dashboardNote").innerHTML=`<strong>現在の登録状況</strong><p>ルール ${d.counts.rules}件 / お知らせ ${d.counts.announcements}件 / FAQ ${d.counts.faqs}件 / 画像 ${d.counts.images}件</p>${d.r2?"":"<p class='warning'>画像管理のR2はまだ未接続です。</p>"}`;
-    }catch(e){
-      console.warn("Dashboard load failed",e);
-    }
-  }catch(e){
-    if(e?.name==="AbortError"){
-      $("loginMessage").textContent="接続に時間がかかっています。12秒で確認を中止しました。";
-    }else{
-      $("loginMessage").textContent="サーバーに接続できませんでした。通信状態かデプロイ状況を確認してください。";
-    }
-  }finally{
-    clearTimeout(timer);
-    button.disabled=false;
-    button.textContent=originalText;
-  }
-}
+async function login(){token=$("adminToken").value.trim();name=$("adminName").value.trim();if(!name)return $("loginMessage").textContent="運営名を入力してください。";const r=await api("/api/admin/check");if(!r.ok)return $("loginMessage").textContent="管理パスワードが違うか設定が完了していません。";localStorage.setItem("northcity_admin_token",token);localStorage.setItem("northcity_admin_name",name);$("loginView").hidden=true;$("adminView").hidden=false;await refresh();resetRule();const d=await (await api("/api/admin/dashboard")).json();$("dashboardNote").innerHTML=`<strong>現在の登録状況</strong><p>ルール ${d.counts.rules}件 / お知らせ ${d.counts.announcements}件 / FAQ ${d.counts.faqs}件 / 画像 ${d.counts.images}件</p>${d.r2?"":"<p class='warning'>画像管理のR2はまだ未接続です。</p>"}`}
 $("loginButton").onclick=login;$("adminToken").onkeydown=e=>{if(e.key==="Enter")login()};$("logoutButton").onclick=()=>{localStorage.removeItem("northcity_admin_token");location.reload()};
-(async()=>{if(!token)return;$("adminToken").value=token;$("adminName").value=name;const r=await api("/api/admin/check");if(r.ok){$("loginView").hidden=true;$("adminView").hidden=false;await refresh();resetRule();const d=await (await api("/api/admin/dashboard")).json();$("dashboardNote").innerHTML=`<strong>現在の登録状況</strong><p>ルール ${d.counts.rules}件 / お知らせ ${d.counts.announcements}件 / FAQ ${d.counts.faqs}件 / 画像 ${d.counts.images}件</p>${d.r2?"":"<p class='warning'>画像管理のR2はまだ未接続です。</p>"}`}})();
+(async()=>{if(!token||!name)return;$("adminToken").value=token;$("adminName").value=name;const r=await api("/api/admin/check");if(r.ok){$("loginView").hidden=true;$("adminView").hidden=false;await refresh();resetRule();const d=await (await api("/api/admin/dashboard")).json();$("dashboardNote").innerHTML=`<strong>現在の登録状況</strong><p>ルール ${d.counts.rules}件 / お知らせ ${d.counts.announcements}件 / FAQ ${d.counts.faqs}件 / 画像 ${d.counts.images}件</p>${d.r2?"":"<p class='warning'>画像管理のR2はまだ未接続です。</p>"}`}})();

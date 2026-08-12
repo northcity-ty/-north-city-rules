@@ -1,5 +1,5 @@
 function J(d,s=200){return new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json;charset=UTF-8","cache-control":"no-store"}})}
-const S=v=>String(v??""), admin=(r,e)=>!!(e.ADMIN_TOKEN&&r.headers.get("x-admin-token")===e.ADMIN_TOKEN), editor=r=>S(r.headers.get("x-admin-name")).trim().slice(0,60)||"運営";
+const S=v=>String(v??""), admin=(r,e)=>!!(e.ADMIN_TOKEN&&r.headers.get("x-admin-token")===e.ADMIN_TOKEN), editor=r=>{const raw=S(r.headers.get("x-admin-name"));try{return decodeURIComponent(raw).trim().slice(0,60)||"運営"}catch{return raw.trim().slice(0,60)||"運営"}};
 async function cols(db,t){const x=await db.prepare(`PRAGMA table_info(${t})`).all();return new Set((x.results||[]).map(v=>v.name))}
 async function addCols(db,t,defs){const c=await cols(db,t);for(const [n,d] of defs)if(!c.has(n))await db.prepare(`ALTER TABLE ${t} ADD COLUMN ${n} ${d}`).run()}
 async function schema(db){
