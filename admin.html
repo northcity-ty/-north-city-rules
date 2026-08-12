@@ -1,181 +1,22 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex,nofollow">
-  <title>North City | ルール管理</title>
-  <link rel="stylesheet" href="admin.css">
-</head>
-<body>
-  <header class="admin-header">
-    <div class="admin-header-inner">
-      <a href="/" class="admin-brand">North City</a>
-      <span>ルール管理</span>
-    </div>
-  </header>
-
-  <main class="admin-shell">
-    <section id="loginView" class="panel login-panel">
-      <p class="eyebrow">ADMIN</p>
-      <h1>管理画面</h1>
-      <p class="help">運営用の管理パスワードを入力してください。</p>
-      <label class="field">
-        <span>管理パスワード</span>
-        <input id="adminToken" type="password" autocomplete="current-password" placeholder="管理パスワード">
-      </label>
-      <button id="loginButton" class="button primary">ログイン</button>
-      <p id="loginMessage" class="message"></p>
-    </section>
-
-    <section id="adminView" hidden>
-      <div class="top-actions">
-        <div>
-          <p class="eyebrow">RULE MANAGER</p>
-          <h1>ルール管理</h1>
-          <p class="help">大タイトル → 中タイトル → 個別ルールの順に整理できます。順番はあとから変更できます。</p>
-        </div>
-        <div class="action-row">
-          <button id="categoryButton" class="button secondary">カテゴリ管理</button>
-          <button id="newRuleButton" class="button primary">＋ 新しいルール</button>
-          <button id="logoutButton" class="button secondary">ログアウト</button>
-        </div>
-      </div>
-
-      <div class="admin-grid">
-        <aside class="panel rule-list-panel">
-          <div class="list-head">
-            <strong>登録済みルール</strong>
-            <input id="adminSearch" type="search" placeholder="検索">
-          </div>
-          <div id="ruleList" class="rule-list"></div>
-        </aside>
-
-        <section class="panel editor-panel">
-          <div class="editor-head">
-            <div>
-              <p class="eyebrow">EDIT</p>
-              <h2 id="editorTitle">新しいルール</h2>
-            </div>
-            <span id="dirtyBadge" class="dirty-badge" hidden>未保存</span>
-          </div>
-
-          <form id="ruleForm">
-            <input id="ruleId" type="hidden">
-
-            <div class="form-grid two">
-              <label class="field"><span>大タイトル</span><select id="majorCategory" required><option value="">選択してください</option></select><small>例：犯罪ルール、基本ルール</small></label>
-              <label class="field"><span>中タイトル</span><select id="subCategory"><option value="">中タイトルなし</option></select><small>例：人質、逃走、ダウン・蘇生</small></label>
-            </div>
-            <label class="field"><span>どれくらい重要？</span><select id="displayType"><option value="normal">通常</option><option value="note">補足</option><option value="caution">注意</option><option value="important">重要</option><option value="prohibited">禁止</option></select></label>
-            <label class="field">
-              <span>ルールの名前</span>
-              <input id="title" required maxlength="200" placeholder="例：外部情報の利用について">
-            </label>
-
-            <label class="field">
-              <span>ルール本文</span>
-              <textarea id="content" required rows="8" placeholder="住民に必ず読んでほしい本文を書きます。"></textarea>
-              <small>重要な内容はここに書き、折りたたまないようにします。</small>
-            </label>
-
-            <div class="details-box">
-              <div class="details-head">
-                <div>
-                  <strong>長い補足・例外</strong>
-                  <small>必要なときだけ使います。</small>
-                </div>
-                <label class="switch-line">
-                  <input id="detailsCollapsed" type="checkbox" checked>
-                  <span>折りたたんで表示</span>
-                </label>
-              </div>
-              <textarea id="details" rows="6" placeholder="細かい補足、例外、詳しい説明など"></textarea>
-            </div>
-
-            <label class="field">
-              <span>今回の更新内容</span>
-              <input id="changeNote" maxlength="1000" placeholder="例：人質の条件を分かりやすく変更">
-              <small>更新情報にも使えます。内容変更時はできるだけ書いてください。</small>
-            </label>
-
-            <div class="publish-box">
-              <label class="switch-line large">
-                <input id="isPublished" type="checkbox" checked>
-                <span>
-                  <strong>公開する</strong>
-                  <small>OFFなら下書きとして保存され、住民には表示されません。</small>
-                </span>
-              </label>
-            </div>
-
-            <details class="advanced">
-              <summary>詳細設定を開く</summary>
-              <div class="advanced-body">
-                <label class="field">
-                  <span>検索用キーワード</span>
-                  <input id="keywords" placeholder="例：PD ポリス 警官">
-                </label>
-                <div class="form-grid two">
-                  <div class="field"><span>並び順</span><small>登録済みルール一覧の ↑ ↓ ボタンで変更できます。</small></div>
-                  <label class="field">
-                    <span>固定URL用ID</span>
-                    <input id="slug" placeholder="空欄なら自動作成">
-                    <small>一度公開した後は基本変更しません。</small>
-                  </label>
-                </div>
-              </div>
-            </details>
-
-            <div class="preview-box">
-              <div class="preview-head">
-                <strong>プレビュー</strong>
-                <span>保存前に見え方を確認</span>
-              </div>
-              <article id="previewCard" class="preview-card">
-                <div class="preview-meta">
-                  <span id="previewType" class="preview-tag">通常</span>
-                  <span id="previewCategory">カテゴリ未選択</span>
-                </div>
-                <h3 id="previewTitle">ルールの名前</h3>
-                <p id="previewContent">ここに本文のプレビューが表示されます。</p>
-                <details id="previewDetails" hidden>
-                  <summary>詳しく見る</summary>
-                  <p id="previewDetailsText"></p>
-                </details>
-              </article>
-            </div>
-
-            <div class="save-bar">
-              <div>
-                <button id="duplicateButton" type="button" class="button secondary" disabled>複製</button>
-                <button id="retireButton" type="button" class="button danger" disabled>このルールを廃止</button>
-              </div>
-              <button type="submit" class="button primary big">保存する</button>
-            </div>
-          </form>
-        </section>
-      </div>
-    </section>
-  </main>
-
-  <dialog id="historyDialog">
-    <div class="dialog-head">
-      <strong>変更履歴</strong>
-      <button id="closeHistory" class="icon-button" aria-label="閉じる">×</button>
-    </div>
-    <div id="historyList" class="history-list"></div>
-  </dialog>
-
-
-  <dialog id="categoryDialog">
-    <div class="dialog-head"><strong>カテゴリ管理</strong><button id="closeCategory" class="icon-button">×</button></div>
-    <div class="category-manager">
-      <p class="help">大タイトル・中タイトルを追加できます。↑↓で表示順を変更します。</p>
-      <div class="category-add"><input id="categoryTitle" placeholder="カテゴリ名"><input id="categoryIcon" placeholder="絵文字" maxlength="8"><select id="categoryParent"><option value="">大タイトルとして追加</option></select><button id="addCategory" class="button primary">追加</button></div>
-      <div id="categoryList"></div>
-    </div>
-  </dialog>
-  <script src="admin.js?v=2"></script>
-</body>
-</html>
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>North City | ルール管理</title><link rel="stylesheet" href="admin.css"></head><body>
+<header class="head"><a href="/">North City</a><span>ルール管理</span></header><main class="shell">
+<section id="login" class="card login"><h1>管理画面</h1><p>運営用パスワードを入力してください。</p><input id="token" type="password" placeholder="管理パスワード"><button id="loginBtn" class="primary">ログイン</button><p id="msg"></p></section>
+<section id="app" hidden><div class="top"><div><h1>ルール管理</h1><p>大タイトル → 中タイトル → 小タイトル（ルール）で管理します。</p></div><button id="logout">ログアウト</button></div>
+<nav class="tabs"><button class="tab active" data-tab="rules">小タイトル・ルール</button><button class="tab" data-tab="middles">中タイトル</button><button class="tab" data-tab="majors">大タイトル</button></nav>
+<section id="rules" class="pane"><div class="filters"><button data-s="all" class="active">すべて</button><button data-s="published">公開中</button><button data-s="draft">下書き</button><button data-s="retired">廃止済み</button></div>
+<div class="grid"><aside class="card side"><div class="sideHead"><b>ルール一覧</b><button id="newRule">＋新規</button></div><input id="search" placeholder="検索"><div id="ruleList"></div></aside>
+<section class="card editor"><div class="editorHead"><h2 id="editorTitle">新しいルール</h2><span id="status" class="badge draft">下書き</span></div>
+<form id="form"><div class="two"><label>大タイトル<select id="major"><option value="">未分類</option></select></label><label>中タイトル<select id="middle"><option value="">未分類</option></select></label></div>
+<div class="two"><label>重要度<select id="type"><option value="normal">通常</option><option value="note">補足</option><option value="caution">注意</option><option value="important">重要</option><option value="prohibited">禁止</option></select></label><label>旧カテゴリ<input id="category"></label></div>
+<label>ルール名<input id="title" required></label><label>短い説明<input id="summary"></label><label>本文<textarea id="content" rows="8" required></textarea></label>
+<div class="subbox"><div class="subhead"><b>長い補足・例外</b><label class="check"><input id="collapsed" type="checkbox" checked>折りたたむ</label></div><textarea id="details" rows="5"></textarea></div>
+<label>今回の更新内容<input id="note" placeholder="例：条件を分かりやすく変更"></label><label class="check pub"><input id="published" type="checkbox" checked>公開する</label>
+<details><summary>詳細設定</summary><label>検索用キーワード<input id="keywords"></label><label>固定URL用ID<input id="slug"></label></details>
+<div class="preview"><b>プレビュー</b><small id="path">未分類</small><h3 id="pvTitle">ルール名</h3><p id="pvContent">本文が表示されます。</p><details id="pvDetails" hidden><summary>詳しく見る</summary><p id="pvDetailText"></p></details></div>
+<div class="bar"><div><button type="button" id="up">↑上へ</button><button type="button" id="down">↓下へ</button><button type="button" id="dup">複製</button><button type="button" id="diff">変更差分</button><button type="button" id="hist">履歴</button></div><div><button type="button" id="restore" hidden>復元</button><button type="button" id="retire">廃止</button><button type="button" id="hard" class="danger" hidden>完全削除</button><button class="primary" type="submit">保存</button></div></div>
+</form></section></div></section>
+<section id="middles" class="pane" hidden><div class="card manager"><div class="managerHead"><div><h2>中タイトル</h2><p>同じ大タイトルの中だけで順番を変えます。</p></div><button id="addMiddle" class="primary">＋中タイトル</button></div><div id="middleList"></div></div></section>
+<section id="majors" class="pane" hidden><div class="card manager"><div class="managerHead"><div><h2>大タイトル</h2><p>大タイトル同士の順番を変えます。</p></div><button id="addMajor" class="primary">＋大タイトル</button></div><div id="majorList"></div></div></section>
+</section></main>
+<dialog id="modal"><div class="modalHead"><b id="modalTitle"></b><button id="close">×</button></div><div id="modalBody"></div></dialog>
+<script src="admin.js?v=2"></script></body></html>
