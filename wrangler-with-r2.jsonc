@@ -16,5 +16,11 @@
       "database_name": "north-city-db",
       "database_id": "117dd489-c53d-40e5-9ff3-112b21093b93"
     }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "northcity-images"
+    }
   ]
 }
