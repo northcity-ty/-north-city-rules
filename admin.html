@@ -1,7 +1,7 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>North City | 管理</title><link rel="stylesheet" href="admin.css"></head><body>
 <header class="admin-header"><div class="admin-header-inner"><a href="/" class="admin-brand">North City</a><span>管理画面</span></div></header>
 <main class="admin-shell">
-<section id="loginView" class="panel login-panel"><p class="eyebrow">ADMIN</p><h1>管理画面</h1><p class="help">運営用パスワードと、履歴に表示する名前を入力してください。</p><label class="field"><span>運営名</span><input id="adminName" placeholder="例：まな"></label><label class="field"><span>管理パスワード</span><input id="adminToken" type="password"></label><button id="loginButton" class="button primary">ログイン</button><p id="loginMessage" class="message"></p></section>
+<section id="loginView" class="panel login-panel"><p class="eyebrow">ADMIN</p><h1>管理画面</h1><p class="help">管理パスワードを入力してください。運営名は変更履歴に表示するためだけに使用します。</p><label class="field"><span>運営名</span><input id="adminName"></label><label class="field"><span>管理パスワード</span><input id="adminToken" type="password"></label><button id="loginButton" class="button primary">ログイン</button><p id="loginMessage" class="message"></p></section>
 <section id="adminView" hidden>
 <div class="top-actions"><div><p class="eyebrow">NORTH CITY ADMIN</p><h1 id="pageTitle">管理トップ</h1><p class="help" id="pageHelp">変更したいものを選んでください。</p></div><div class="top-buttons"><button id="homeButton" class="button secondary" hidden>管理トップ</button><button id="logoutButton" class="button secondary">ログアウト</button></div></div>
 <section id="homePage" class="admin-page"><div class="admin-home-grid">
