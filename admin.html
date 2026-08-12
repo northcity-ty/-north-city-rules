@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>North City | ルール管理</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <a href="/" class="admin-brand">North City</a>
+      <span>ルール管理</span>
+    </div>
+  </header>
+
+  <main class="admin-shell">
+    <section id="loginView" class="panel login-panel">
+      <p class="eyebrow">ADMIN</p>
+      <h1>管理画面</h1>
+      <p class="help">運営用の管理パスワードを入力してください。</p>
+      <label class="field">
+        <span>管理パスワード</span>
+        <input id="adminToken" type="password" autocomplete="current-password" placeholder="管理パスワード">
+      </label>
+      <button id="loginButton" class="button primary">ログイン</button>
+      <p id="loginMessage" class="message"></p>
+    </section>
+
+    <section id="adminView" hidden>
+      <div class="top-actions">
+        <div>
+          <p class="eyebrow">RULE MANAGER</p>
+          <h1>ルール管理</h1>
+          <p class="help">カテゴリを選んで、タイトルと本文を書けば基本の登録は完了です。</p>
+        </div>
+        <div class="action-row">
+          <button id="newRuleButton" class="button primary">＋ 新しいルール</button>
+          <button id="logoutButton" class="button secondary">ログアウト</button>
+        </div>
+      </div>
+
+      <div class="admin-grid">
+        <aside class="panel rule-list-panel">
+          <div class="list-head">
+            <strong>登録済みルール</strong>
+            <input id="adminSearch" type="search" placeholder="検索">
+          </div>
+          <div id="ruleList" class="rule-list"></div>
+        </aside>
+
+        <section class="panel editor-panel">
+          <div class="editor-head">
+            <div>
+              <p class="eyebrow">EDIT</p>
+              <h2 id="editorTitle">新しいルール</h2>
+            </div>
+            <span id="dirtyBadge" class="dirty-badge" hidden>未保存</span>
+          </div>
+
+          <form id="ruleForm">
+            <input id="ruleId" type="hidden">
+
+            <div class="form-grid two">
+              <label class="field">
+                <span>どこに載せる？</span>
+                <select id="category" required>
+                  <option value="">選択してください</option>
+                  <option>初心者向け</option>
+                  <option>基本ルール</option>
+                  <option>RPルール</option>
+                  <option>禁止行為</option>
+                  <option>犯罪ルール</option>
+                  <option>ギャング・抗争</option>
+                  <option>罪状・罰則</option>
+                  <option>白市民</option>
+                  <option>店舗・会社</option>
+                  <option>警察</option>
+                  <option>EMS</option>
+                  <option>メカニック</option>
+                  <option>運営チーム規約</option>
+                </select>
+                <small>ルールが表示されるカテゴリです。</small>
+              </label>
+
+              <label class="field">
+                <span>どれくらい重要？</span>
+                <select id="displayType">
+                  <option value="normal">通常</option>
+                  <option value="note">補足</option>
+                  <option value="caution">注意</option>
+                  <option value="important">重要</option>
+                  <option value="prohibited">禁止</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>ルールの名前</span>
+              <input id="title" required maxlength="200" placeholder="例：外部情報の利用について">
+            </label>
+
+            <label class="field">
+              <span>短い説明</span>
+              <input id="summary" maxlength="500" placeholder="一覧や検索結果に表示する短い説明">
+            </label>
+
+            <label class="field">
+              <span>ルール本文</span>
+              <textarea id="content" required rows="8" placeholder="住民に必ず読んでほしい本文を書きます。"></textarea>
+              <small>重要な内容はここに書き、折りたたまないようにします。</small>
+            </label>
+
+            <div class="details-box">
+              <div class="details-head">
+                <div>
+                  <strong>長い補足・例外</strong>
+                  <small>必要なときだけ使います。</small>
+                </div>
+                <label class="switch-line">
+                  <input id="detailsCollapsed" type="checkbox" checked>
+                  <span>折りたたんで表示</span>
+                </label>
+              </div>
+              <textarea id="details" rows="6" placeholder="細かい補足、例外、詳しい説明など"></textarea>
+            </div>
+
+            <label class="field">
+              <span>今回の更新内容</span>
+              <input id="changeNote" maxlength="1000" placeholder="例：人質の条件を分かりやすく変更">
+              <small>更新情報にも使えます。内容変更時はできるだけ書いてください。</small>
+            </label>
+
+            <div class="publish-box">
+              <label class="switch-line large">
+                <input id="isPublished" type="checkbox" checked>
+                <span>
+                  <strong>公開する</strong>
+                  <small>OFFなら下書きとして保存され、住民には表示されません。</small>
+                </span>
+              </label>
+            </div>
+
+            <details class="advanced">
+              <summary>詳細設定を開く</summary>
+              <div class="advanced-body">
+                <label class="field">
+                  <span>検索用キーワード</span>
+                  <input id="keywords" placeholder="例：PD ポリス 警官">
+                </label>
+                <div class="form-grid two">
+                  <label class="field">
+                    <span>並び順</span>
+                    <input id="sortOrder" type="number" value="0">
+                  </label>
+                  <label class="field">
+                    <span>固定URL用ID</span>
+                    <input id="slug" placeholder="空欄なら自動作成">
+                    <small>一度公開した後は基本変更しません。</small>
+                  </label>
+                </div>
+              </div>
+            </details>
+
+            <div class="preview-box">
+              <div class="preview-head">
+                <strong>プレビュー</strong>
+                <span>保存前に見え方を確認</span>
+              </div>
+              <article id="previewCard" class="preview-card">
+                <div class="preview-meta">
+                  <span id="previewType" class="preview-tag">通常</span>
+                  <span id="previewCategory">カテゴリ未選択</span>
+                </div>
+                <h3 id="previewTitle">ルールの名前</h3>
+                <p id="previewContent">ここに本文のプレビューが表示されます。</p>
+                <details id="previewDetails" hidden>
+                  <summary>詳しく見る</summary>
+                  <p id="previewDetailsText"></p>
+                </details>
+              </article>
+            </div>
+
+            <div class="save-bar">
+              <div>
+                <button id="historyButton" type="button" class="button secondary" disabled>変更履歴</button>
+                <button id="retireButton" type="button" class="button danger" disabled>このルールを廃止</button>
+              </div>
+              <button type="submit" class="button primary big">保存する</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="historyDialog">
+    <div class="dialog-head">
+      <strong>変更履歴</strong>
+      <button id="closeHistory" class="icon-button" aria-label="閉じる">×</button>
+    </div>
+    <div id="historyList" class="history-list"></div>
+  </dialog>
+
+  <script src="admin.js?v=1"></script>
+</body>
+</html>
