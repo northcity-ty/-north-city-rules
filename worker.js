@@ -164,7 +164,10 @@ async function applyRuleContentV3(db){
  await db.prepare("INSERT INTO site_settings(key,value,updated_at,edited_by) VALUES('rule_content_v3_applied','1',CURRENT_TIMESTAMP,'ルール移行') ON CONFLICT(key) DO UPDATE SET value='1',updated_at=CURRENT_TIMESTAMP,edited_by='ルール移行'").run();
 }
 
-export default{async fetch(req,env){const u=new URL(req.url);await schema(env.DB);await normalizeOfficialStructure(env.DB);await seedInitialRules(env.DB);await applyRuleContentV3(env.DB);
+export default{async fetch(req,env){const u=new URL(req.url);
+ if(u.pathname==="/api/admin/check"){if(!admin(req,env))return J({ok:false,message:"Unauthorized"},401);return J({ok:true,r2:!!env.IMAGES})}
+ await schema(env.DB);
+ try{await normalizeOfficialStructure(env.DB);await seedInitialRules(env.DB);await applyRuleContentV3(env.DB)}catch(err){console.error("rule migration skipped",err)}
  if(u.pathname==="/api/public"){const [rr,aa,ff,ii,ss,hh,nn]=await Promise.all([
   env.DB.prepare(`SELECT r.*,ma.title major_title,ma.description major_description,ma.is_required major_required,mi.title middle_title,mi.description middle_description,mi.is_required middle_required FROM rules r LEFT JOIN rule_major_titles ma ON ma.id=r.major_id LEFT JOIN rule_middle_titles mi ON mi.id=r.middle_id WHERE r.is_published=1 AND r.retired_at IS NULL ORDER BY COALESCE(ma.sort_order,99999),COALESCE(mi.sort_order,99999),r.sort_order,r.id`).all(),
   env.DB.prepare(`SELECT * FROM announcements WHERE is_published=1 ORDER BY is_important DESC,sort_order,id DESC`).all(),
@@ -176,7 +179,6 @@ export default{async fetch(req,env){const u=new URL(req.url);await schema(env.DB
   return J({ok:true,rules:rr.results||[],announcements:aa.results||[],faqs:ff.results||[],images:ii.results||[],settings:ss,rule_updates:updates})
  }
  if(u.pathname.startsWith("/media/")){if(!env.IMAGES)return new Response("Not configured",{status:404});const key=decodeURIComponent(u.pathname.slice(7)),o=await env.IMAGES.get(key);if(!o)return new Response("Not found",{status:404});const h=new Headers();o.writeHttpMetadata(h);h.set("etag",o.httpEtag);h.set("cache-control","public,max-age=86400");return new Response(o.body,{headers:h})}
- if(u.pathname==="/api/admin/check"){if(!admin(req,env))return J({ok:false,message:"Unauthorized"},401);return J({ok:true,r2:!!env.IMAGES})}
  if(!u.pathname.startsWith("/api/admin/"))return env.ASSETS.fetch(req);
  if(!admin(req,env))return J({ok:false,message:"Unauthorized"},401);const ed=editor(req);
  if(u.pathname==="/api/admin/dashboard"){const q=async(sql)=>+(await env.DB.prepare(sql).first())?.n||0;return J({ok:true,counts:{rules:await q("SELECT COUNT(*) n FROM rules WHERE retired_at IS NULL"),published:await q("SELECT COUNT(*) n FROM rules WHERE is_published=1 AND retired_at IS NULL"),announcements:await q("SELECT COUNT(*) n FROM announcements"),faqs:await q("SELECT COUNT(*) n FROM faqs"),images:await q("SELECT COUNT(*) n FROM site_images")},r2:!!env.IMAGES})}
