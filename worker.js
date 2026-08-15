@@ -144,6 +144,148 @@ const RULE_CONTENT_V3=[
 ["mechanic-engine-swap","メカニックルール","料金","エンジンスワップ料金",`| エンジン | 料金 |\n| --- | ---: |\n| I4 | 4,000万円 |\n| V6 | 6,000万円 |\n| V8 | 8,000万円 |\n| V12 | 1億2,000万円 |\n\n**エンジンスワップは白市民3割引の対象外です。**`,"text","メカニック,全住民"],
 ["admin-regulations","運営規約",null,"運営チーム内部規約",`第1条（目的）\n\n本規約は、運営チームとして公平かつ円滑なサーバー運営を行うために必要な行動基準および遵守事項を定めることを目的とする。\n\n第2条（基本方針）\n\n1. 運営メンバーは、常に公平かつ中立な立場で対応しなければならない。\n2. 個人的な感情や人間関係によって対応内容を変更してはならない。\n3. サーバー全体の利益を優先し、運営として責任ある行動を取らなければならない。\n\n第3条（守秘義務）\n\n1. 運営活動を通じて知り得た内部情報、開発情報、個人情報その他の機密情報を、運営全体の許可なく第三者へ開示してはならない。\n2. 運営権限によって知り得た情報を私的な目的で利用してはならない。\n\n第4条（権限の行使）\n\n1. 運営権限は、サーバー運営に必要な範囲でのみ使用しなければならない。\n2. 権限を私的な目的や特定のプレイヤーを優遇または不利益に扱う目的で使用してはならない。\n3. テストを目的として権限を使用する場合は、運営チーム内で共有し、必要に応じて適切な環境で実施するものとする。\n4. 権限をロールプレイキャラクターで使用することは認められない。使用する場合は必ずキャラクターを変更して使用しなければならない。\n\n第5条（プレイヤー対応）\n\n1. プレイヤーへの対応は、常に冷静かつ丁寧に行わなければならない。\n2. 暴言、煽り、威圧的な発言その他運営として不適切な言動を行ってはならない。\n3. 問題が発生した場合は、事実確認を優先し、憶測や一方的な判断による対応を行ってはならない。\n\n第6条（運営内での連携）\n\n1. サーバー運営に重大な影響を及ぼす対応を行う場合は、可能な限り他の運営メンバーへ情報共有を行うものとする。\n2. 判断が困難な案件については、独断で対応せず、運営チーム内で協議を行うものとする。\n\n第7条（禁止事項）\n\n運営メンバーは、次の各号に掲げる行為を行ってはならない。\n\n1. 権限の私的利用\n2. 内部情報の漏えい\n3. プレイヤーへの差別的対応\n4. 個人的な理由による処罰または優遇\n5. 運営権限を利用した利益の取得\n6. 他の運営メンバーの信用を不当に損なう行為\n7. サーバー運営に支障を及ぼす行為\n\n第8条（責任）\n\n運営メンバーは、自らの判断および行動に責任を負い、問題が発生した場合は速やかに運営チームへ報告しなければならない。\n\n第9条（規約違反）\n\n本規約に違反した場合は、その内容および重大性を考慮し、警告、権限の制限または剥奪、運営チームからの除名その他必要な措置を講じる場合がある。\n\n第10条（規約の改定）\n\n本規約は、サーバー運営上必要と判断した場合、運営責任者または管理者の判断により改定できるものとする。\n\n第11条（開発成果物の取扱い）\n\n1. 運営メンバーがサーバー運営に関連して開発、制作、修正または導入したソースコード、スクリプト、設定ファイル、画像、UI、データその他一切の成果物は、特段の合意がある場合を除き、本サーバーの保有物とする。\n2. 開発途中のソースコードおよび未完成の成果物についても、本サーバーの運営を目的として作成されたものである場合は、本サーバーの保有物とする。\n3. 運営メンバーが自ら制作した成果物については、個人の販売サイトその他これに準ずるサービスにおいて販売することを認める。ただし、本サーバー専用として制作された機密情報、独自システム、設定情報その他本サーバーの運営に支障を及ぼす内容を含む場合は、この限りではない。\n4. 一度本サーバーへ導入した成果物については削除してはならない。\n5. 運営メンバーは、本サーバーで使用されている成果物について、運営責任者から求められた場合は、最新版を引き継ぎ可能な状態で提出しなければならない。\n\n第12条（規約への同意）\n\n開発サーバーへの参加権限を付与された者は、本規約の内容を確認し、これに同意したものとみなすものとする。また、参加権限を保持している期間中は、本規約を遵守する義務を負うものとする。`,"text","運営"]
 ];
+
+
+const RULE_CONTENT_V4=[
+["nc-about","はじめに","North Cityについて","North Cityについて",`North Cityは、ストーリーや交流を大切にする「ゆるっとRPサーバー」です。
+
+この街では、勝敗だけを目的とするのではなく、RPの過程や、そこで生まれる出来事、住民同士の関係性を楽しむことを大切にしています。
+
+初心者から経験者まで、さまざまな住民が参加します。RPの知識や経験には差があることを前提に、互いに配慮しながら街での生活を楽しんでください。
+
+## 参加にあたって
+North Cityに参加した時点で、本ルールに同意したものとみなします。
+
+参加前に必ずルールを確認し、内容を理解したうえで参加してください。ルールを確認していなかった場合でも、違反行為が確認された際は、運営判断により注意・警告・処分の対象となる場合があります。
+
+## 参加条件
+- 日本語で基本的なコミュニケーションが取れること
+- サーバールールを理解し、遵守できること
+- 他プレイヤーと協力しながらRPを楽しめること
+- 運営からの連絡・アナウンスを確認できること
+- **18歳以上であること**
+
+分からないことや困ったことがある場合は、自己判断で進めず、チケットにて運営へご相談ください。
+
+## サーバー基本情報
+| 項目 | 内容 |
+| --- | --- |
+| サーバー名 | North City |
+| 開放時間 | 15:00 ～ 翌05:00 |
+| 再起動時間 | 18:00 / 02:00 |
+| 犯罪可能時間 | 18:00 ～ 02:00 |
+
+**再起動前後15分間は犯罪行為を禁止します。**
+
+再起動15分前の通知が出た時点で、進行中の犯罪は原則として警察（PD）側勝利扱いとします。通知後に犯罪行為を継続した場合、運営判断により注意・警告・処分の対象となる場合があります。
+
+犯罪RPを行う場合は、必ず犯罪可能時間と再起動時間を確認してください。
+
+## North Cityで大切にしてほしいこと
+- 自分だけでなく、相手も楽しめるRPを心がける
+- 勝ち負けよりも、ストーリーや流れを大切にする
+- 相手のRPやキャラクターを尊重する
+- 初心者や新規住民にも優しく接する
+- トラブル時は感情的にならず、落ち着いて対応する
+- サーバー全体が楽しめる行動を心がける
+
+## RPと中の人の切り分けについて
+中の人同士の会話は可能です。
+
+ただし、キャラクターとしての発言や行動は、そのキャラクターがRP内で知り得た情報を基準に行ってください。Discord、配信、SNS、外部VCなどで得た情報や、中の人しか知らない情報をキャラクターの行動に利用することは禁止します。
+
+外部情報の詳しい扱いは、基本ルール内の「メタ・外部情報」「配信・録画」「不正行為・外部ツール」も確認してください。
+
+## トラブルが起きた場合
+RP中にトラブルや認識の違いが発生した場合は、感情的にならず、まずは落ち着いて対応してください。
+
+街中で解決できる内容は、RPや会話の流れを大切にしながら対応してください。当事者同士で解決が難しい場合、ルール違反の可能性がある場合、街外での粘着行為などがある場合は、チケットにて運営へご相談ください。
+
+住民同士で動画提出や証拠提出を強要する行為は禁止します。動画提出や確認が必要な場合は、運営が判断します。
+
+## 最後に
+North Cityは、ゆるっとした雰囲気でRPを楽しめる街を目指しています。
+
+ただし、ゆるっとRPサーバーであっても、ルール違反や他プレイヤーへの迷惑行為が認められるわけではありません。
+
+すべての住民が安心してRPを楽しめるよう、ルールを確認し、相手への配慮を忘れずに行動してください。
+
+ルールに記載がない内容であっても、街の雰囲気や他住民の体験を大きく損なうと運営が判断した場合、注意・警告・処分の対象となる場合があります。`,"text","全住民"],
+["beginner-guide","はじめに","初心者向け","初心者向け",`当サーバーでは、全員が楽しくRPを行える環境作りを大切にしています。
+
+RPは一人で完結するものではなく、相手がいて成立するものです。自分だけが得をする行動、相手のRPを一方的に潰す行動、会話や状況を無視した行動は避けてください。
+
+## RPで大切にしてほしいこと
+- 相手にもRPを返す余地を残す
+- 会話や状況を大切にする
+- 現実ではなく、キャラクターとして行動する
+- 負けるRP、失敗するRPも楽しむ
+- サーバー全体が楽しめる流れを大切にする
+
+**RPは「勝つこと」だけが目的ではありません。** その場の会話や展開、住民同士の関係性を楽しむことも大切です。
+
+## 楽しみ方
+特別なことをしなくても、日常の中でRPは生まれます。
+
+仕事をしてお金を稼ぐ、飲食店で会話をする、誰かと知り合う、事件に巻き込まれるなど、小さな出来事もキャラクターの物語になります。
+
+RPに正解はありません。自分のキャラクターらしさを大切にしながら、相手のRPにも反応を返していきましょう。
+
+- 市民生活を楽しむ
+- 仕事やアルバイトを通して交流する
+- 飲食店や店舗で会話を楽しむ
+- 住民同士の関係性を作る
+- トラブルや失敗もRPとして楽しむ
+- キャラクターの目標や生活スタイルを作る
+- 周囲のRPに反応し、会話や展開を広げる
+
+何をすればいいか分からない場合は、まず街を歩いてみたり、仕事を体験したり、飲食店や人が集まる場所に行ってみるのがおすすめです。
+
+## 初心者の方へ
+初心者の方は、分からないことがあるのが普通です。最初から完璧なRPをする必要はありません。
+
+ただし、分からないまま危険な行動や犯罪RPを行うと、トラブルにつながる場合があります。不安な場合は、まず市民生活・職業体験・交流RPなどから始めることを推奨します。
+
+**初心者マークが付いている間は、犯罪行為を禁止します。**
+
+## 初心者が避けるべき行動
+| 避けるべき行動 | 理由 |
+| --- | --- |
+| ルールを読まずに犯罪を始める | トラブルやルール違反につながる可能性があります |
+| 警察や救急隊への過度な妨害 | 他プレイヤーの職業RPを妨げる可能性があります |
+| 他プレイヤーへの強引な絡み | 相手がRPを返しづらくなる場合があります |
+| 知識がない状態でギャングや犯罪組織に入る | 犯罪ルールや組織ルールの理解が必要です |
+| 現実の知識をそのままRPに持ち込む | メタ行為やRP崩れにつながる場合があります |
+
+## 分からない時の対応
+- ルールページを確認する
+- Discordのお知らせを確認する
+- 周囲のプレイヤーにRP内で聞く
+- チケットで運営に質問する
+
+自己判断で進めて問題が起きた場合、ルール違反として対応される場合があります。不安な場合は、事前に確認してください。`,"text","初心者,全住民"],
+["beginner-crime-prohibited","基本ルール","禁止事項","初心者マーク中の犯罪禁止",`初心者マークが付いている間は、犯罪行為を禁止します。
+
+初心者マークが付いている間は、まず街の雰囲気や基本ルールを理解することを優先してください。`,"warning","初心者,全住民"]
+];
+async function applyRuleContentV4(db){
+ const marker=await db.prepare("SELECT value FROM site_settings WHERE key='rule_content_v4_applied'").first();
+ if(marker?.value==='1')return;
+ for(const r of RULE_CONTENT_V4){
+  const [sl,ma,mi,title,content,layout,tags]=r;
+  const [majorId,middleId]=await ensureSection(db,ma,mi);
+  const old=await db.prepare("SELECT * FROM rules WHERE slug=? LIMIT 1").bind(sl).first();
+  if(old){
+   await hist(db,old,"はじめに・初心者向け更新前","ルール移行");
+   await db.prepare(`UPDATE rules SET category=?,title=?,content=?,major_id=?,middle_id=?,layout_type=?,tags=?,is_published=1,retired_at=NULL,change_note='はじめに・初心者向け更新',edited_by='ルール移行',updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(ma,title,content,majorId,middleId,layout,tags,old.id).run();
+  }else{
+   const so=await next(db,"rules",middleId?"WHERE middle_id=?":"WHERE middle_id IS NULL",middleId?[middleId]:[]);
+   await db.prepare(`INSERT INTO rules(slug,category,title,summary,content,display_type,is_published,sort_order,keywords,details,details_collapsed,change_note,new_until,major_id,middle_id,is_required,edited_by,layout_type,tags,created_at,updated_at)VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(sl,ma,title,"",content,"normal",1,so,"","",1,"はじめに・初心者向け追加",null,majorId,middleId,0,"ルール移行",layout,tags).run();
+  }
+ }
+ await db.prepare("INSERT INTO site_settings(key,value,updated_at,edited_by) VALUES('rule_content_v4_applied','1',CURRENT_TIMESTAMP,'ルール移行') ON CONFLICT(key) DO UPDATE SET value='1',updated_at=CURRENT_TIMESTAMP,edited_by='ルール移行'").run();
+}
+
 async function applyRuleContentV3(db){
  const marker=await db.prepare("SELECT value FROM site_settings WHERE key='rule_content_v3_applied'").first();
  if(marker?.value==='1')return;
@@ -167,7 +309,7 @@ async function applyRuleContentV3(db){
 export default{async fetch(req,env){const u=new URL(req.url);
  if(u.pathname==="/api/admin/check"){if(!admin(req,env))return J({ok:false,message:"Unauthorized"},401);return J({ok:true,r2:!!env.IMAGES})}
  await schema(env.DB);
- try{await normalizeOfficialStructure(env.DB);await seedInitialRules(env.DB);await applyRuleContentV3(env.DB)}catch(err){console.error("rule migration skipped",err)}
+ try{await normalizeOfficialStructure(env.DB);await seedInitialRules(env.DB);await applyRuleContentV3(env.DB);await applyRuleContentV4(env.DB)}catch(err){console.error("rule migration skipped",err)}
  if(u.pathname==="/api/public"){const [rr,aa,ff,ii,ss,hh,nn]=await Promise.all([
   env.DB.prepare(`SELECT r.*,ma.title major_title,ma.description major_description,ma.is_required major_required,mi.title middle_title,mi.description middle_description,mi.is_required middle_required FROM rules r LEFT JOIN rule_major_titles ma ON ma.id=r.major_id LEFT JOIN rule_middle_titles mi ON mi.id=r.middle_id WHERE r.is_published=1 AND r.retired_at IS NULL ORDER BY COALESCE(ma.sort_order,99999),COALESCE(mi.sort_order,99999),r.sort_order,r.id`).all(),
   env.DB.prepare(`SELECT * FROM announcements WHERE is_published=1 ORDER BY is_important DESC,sort_order,id DESC`).all(),
