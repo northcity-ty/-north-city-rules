@@ -25,18 +25,20 @@ async function hist(db,r,n,e){if(r)await db.prepare(`INSERT INTO rule_history(ru
 async function settings(db){const r=await db.prepare("SELECT key,value FROM site_settings").all();return Object.fromEntries((r.results||[]).map(x=>[x.key,x.value]))}
 function ext(type){return({"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif"}[type]||"")}
 const OFFICIAL_RULE_STRUCTURE=[
- ["はじめに",["North Cityについて","初心者向け","参加について","RP・ルールについて","用語について"]],
+ ["はじめに",["North Cityについて","初心者向け","用語について"]],
  ["基本ルール",["禁止事項","RP上の禁止事項","メタ・外部情報","配信・録画","不正行為・外部ツール","アイテム・車両・施設","バグ・不具合"]],
  ["職業・市民ルール",["ジョブ共通ルール","Job・兼業","オーナー・サブオーナー","違反ポイント","白市民・黒市民"]],
- ["犯罪ルール",["犯罪の基本","犯罪区分","犯罪シーン","犯罪中の行動","人質・第三者","逃走","犯罪終了後・指名手配","歪み・再起動"]],
- ["警察ルール",["警察の基本","発砲・制圧","犯罪対応","法律・罰金","持ち物検査・押収","車両・装備","犯罪収束後","市民への補償","警察内部"]],
- ["EMSルール",["EMSの基本","救助・医療","犯罪・事件対応","禁止事項","EMSへの妨害","料金・請求"]],
- ["メカニックルール",["メカニックの基本","開業・運営","勤務・職務","修理・カスタム","料金・請求","犯罪・事件時の対応","職務上の制限"]],
+ ["犯罪ルール",["犯罪の基本","犯罪区分","犯罪シーン","人質","逃走","指名手配","歪み・再起動"]],
+ ["警察ルール",["警察の基本","発砲・制圧","法律・罰金","持ち物検査・押収","車両・装備","警察側の援護射撃","犯罪収束後","市民への補償","警察内部"]],
+ ["EMSルール",["EMSの基本","救助・医療","犯罪現場","禁止事項","EMSへの妨害"]],
+ ["メカニックルール",["メカニックの基本","開業・運営","業務・修理","禁止事項","閉業・営業停止"]],
  ["店舗・会社ルール",["店舗・会社の基本","設立・開業","営業・運営","禁止事項","責任・閉業"]],
- ["ギャング・組織ルール",["組織の基本","設立・所属","組織活動","アジト","組織間の関係","抗争","脱退・移籍"]],
- ["補填・トラブル対応・お問い合わせ",["チケット・お問い合わせ","補填","録画・証拠","歪み・不具合","トラブル・違反報告","違反対応"]],
+ ["ギャング・組織ルール",["組織の基本","ギャング","その他犯罪組織","組織への加入・脱退","組織間の行動","抗争","組織の禁止事項"]],
+ ["ライセンス",["武器ライセンス","営業ライセンス"]],
+ ["料金",["EMS料金","店舗・会社関連費用","メカニック関連費用","その他行政料金"]],
+ ["補填・トラブル対応・お問い合わせ",["チケット・お問い合わせ","補填","違反報告・トラブル","違反対応"]],
  ["運営規約",[]]
-];
+]
 async function resetOfficialRules(db,ed){
  await db.batch([
   db.prepare("DELETE FROM rule_history"),
@@ -52,20 +54,65 @@ async function resetOfficialRules(db,ed){
  }
  return {majors:OFFICIAL_RULE_STRUCTURE.length,middles:OFFICIAL_RULE_STRUCTURE.reduce((n,x)=>n+x[1].length,0)};
 }
-export default{async fetch(req,env){const u=new URL(req.url);await schema(env.DB);
- if(u.pathname==="/api/public"){const [rr,aa,ff,ii,ss]=await Promise.all([
+
+async function ensureSection(db,majorTitle,middleTitle){
+ let ma=await db.prepare("SELECT id FROM rule_major_titles WHERE title=? ORDER BY id LIMIT 1").bind(majorTitle).first();
+ if(!ma){const so=await next(db,"rule_major_titles");const r=await db.prepare("INSERT INTO rule_major_titles(title,sort_order,edited_by)VALUES(?,?,?)").bind(majorTitle,so,"初期データ").run();ma={id:r.meta.last_row_id}}
+ if(!middleTitle)return [ma.id,null];
+ let mi=await db.prepare("SELECT id FROM rule_middle_titles WHERE major_id=? AND title=? ORDER BY id LIMIT 1").bind(ma.id,middleTitle).first();
+ if(!mi){const so=await next(db,"rule_middle_titles","WHERE major_id=?",[ma.id]);const r=await db.prepare("INSERT INTO rule_middle_titles(major_id,title,sort_order,edited_by)VALUES(?,?,?,?)").bind(ma.id,middleTitle,so,"初期データ").run();mi={id:r.meta.last_row_id}}
+ return [ma.id,mi.id]
+}
+const INITIAL_RULES=[
+["nc-about","はじめに","North Cityについて","North Cityについて","North Cityは、ストーリーを重視しながら、ゆるくRPを楽しむ街です。","勝敗だけではなく、会話や過程、住民同士の関係から生まれる物語を大切にしてください。","text","全住民"],
+["beginner-guide","はじめに","初心者向け","初めて街に入る方へ","まずは街の雰囲気や基本ルールを知ることから始めてください。\n\n初心者マークがついている間は犯罪を行うことを禁止します。","text","初心者,全住民"],
+["rp-terms","はじめに","用語について","最低限のRP用語","- **心なき**：NPCを指します。\n- **魂抜け（たまぬけ）**：プレイヤーが一時的に離席している状態を指します。\n- **黒市民**：犯罪者を指します。","text","初心者"],
+["basic-rules","基本ルール","禁止事項","基本ルール","当サーバーでは、すべての住民が安心してRPを楽しめる環境作りを大切にしています。\n\n- 他プレイヤーへの暴言、誹謗中傷を禁止します\n- 差別的発言、過度な下ネタ、脅迫行為を禁止します\n- 荒らし行為、迷惑行為を禁止します\n- 連投やチャット妨害を禁止します\n- チート、許可のない外部ツール、不正クライアントの使用を禁止します\n- バグやゲーム仕様を悪用する行為を禁止します\n- 運営の指示には従ってください\n- 所持しているライセンスはインベントリに入れ、常に携帯してください","card","全住民"],
+["rp-prohibited","基本ルール","RP上の禁止事項","RP上の禁止事項","- **メタ発言**：RP外の情報をRP中に発言する行為\n- **メタ情報の使用**：外部情報をキャラクターの行動に利用する行為\n- **パワーゲーミング**：ゲーム仕様を利用した非現実的な行動\n- **RDM**：理由のない攻撃・殺害行為\n- **コンバットログ**：不利な状況で意図的にログアウトする行為\n- **過度な煽り行為**：RPの範囲を超えて相手を不快にさせる行為\n- **一方的なRP**：相手に選択肢を与えず、展開を押し付ける行為\n\n車両に乗車した状態で銃を撃つドライブバイは禁止です。","card","全住民"],
+["meta-external","基本ルール","メタ・外部情報","メタ・外部情報について","RP中は、キャラクターがRP内で知り得た情報をもとに行動してください。\n\nDiscord、配信、SNS、外部VC、画面共有などで得た情報をキャラクターの行動に利用することは禁止です。\n\n声のみで相手を特定する行為、請求書やボスメニュー等を利用して名前を不当に確認する行為も禁止します。\n\n犯罪シーン中の車両ナンバーから個人を特定する行為は許可します。","notice","全住民"],
+["private-info","基本ルール","メタ・外部情報","非公開情報の公開禁止","受注場所、精製場所、犯罪獲得金額、隠されている仕様などの非公開情報を、不特定多数が見える場所で公開する行為は禁止です。\n\n取引や街中での情報売買は可能です。","text","全住民"],
+["streaming","基本ルール","配信・録画","配信・録画について","配信する場合は、事前にチケットで運営へお知らせください。Discordの宣伝場所は自由に使用できます。\n\n街中にいる状態で配信を見る場合は、配信者から許可を取ってください。配信を見たことを理由に街中での行動を変えることは禁止です。\n\n住民同士で動画や証拠の提出を強要することは禁止です。提出を求めることができるのは運営のみです。","notice","全住民,配信"],
+["tools-mods","基本ルール","不正行為・外部ツール","不正行為・外部ツール","スピードブースト、チート、バグやゲーム仕様の悪用は禁止です。\n\nグラフィックMOD、外部ツール・外部ソフトウェアは、**事前に運営の許可を得た場合のみ使用できます。**\n\n武器スキンは使用できます。ただし、レーザーサイトの追加や過度な視認性向上など、戦闘で有利になる変更は禁止です。","warning","全住民"],
+["safe-zone","基本ルール","アイテム・車両・施設","セーフゾーンについて","病院、メカニック、飲食店など、営業店舗や公共施設と考えられる**建物内**はセーフゾーンです。\n\nセーフゾーン内では発砲を禁止します。また、逃げ込みを目的とした立ち寄りも禁止です。\n\n警察に限り、制圧を目的としたテーザー銃の使用を許可します。","notice","全住民"],
+["job-common","職業・市民ルール","ジョブ共通ルール","ジョブ共通ルール","各ジョブに就くプレイヤーは、その職業に応じた責任を持って行動してください。\n\n犯罪が許可されている職業は、**犯罪準備シーン・犯罪シーン中は退勤**してください。警察・EMS・メカニックなど在籍中の犯罪が禁止されている職業は、各職業の個別ルールを優先します。\n\n放置状態、業務に関係のない行動を継続する場合、音声を聞くことができない状態では出勤を維持しないでください。","card","職業"],
+["jobs-combination","職業・市民ルール","Job・兼業","Job数・兼業について","Jobは**最大2つまで**です。\n\n同業他社に所属できるかどうかは、各店舗・会社のオーナー同士の判断とします。\n\n- ギャング × 警察\n- ギャング × EMS\n- ギャング × メカニック\n- メカニック × 警察\n- メカニック × EMS\n- 警察 × EMS\n- ギャング × 犯罪組織\n- メカニック × メカニック\n\n上記の兼業は禁止です。","card","職業"],
+["owners","職業・市民ルール","オーナー・サブオーナー","オーナー・サブオーナーについて","会社・店舗の代表者を変更する場合は、事前に運営へ申請し、承認を受ける必要があります。\n\n承認を受けずに営業権や代表権を第三者へ譲渡・貸与することは禁止します。\n\n**オーナー・サブオーナーとして登録できるのは、プレイヤー1人につき1つまでです。**","text","職業,店舗"],
+["job-points","職業・市民ルール","違反ポイント","違反ポイント","- **1ポイント**：口頭注意・警告\n- **2ポイント**：責任者判断による処分（業務停止・役職変更・罰金など）\n- **3ポイント**：組織・店舗ルールに基づく最終処分（閉業・営業停止・解散・その他必要な処分）\n\n悪質な違反や故意による不正行為は、ポイントに関係なく即時処分となる場合があります。","card","職業"],
+["crime-scenes","犯罪ルール","犯罪シーン","犯罪シーンの区分","## 犯罪準備シーン\n犯罪を行うことを決め、準備を始めた時点から犯罪開始直前まで。\n\n## 犯罪シーン\n犯罪を開始してから犯罪現場を離れるまで。\n\n## 逃走シーン\n犯罪現場を離れた時点から、警察を撒く、またはアジトに逃げ切るまで。\n\n## 指名手配シーン\n警察から指名手配された本人にのみ発生します。自分が指名手配されていない場合、指名手配シーンはありません。","steps","犯罪者"],
+["escape-rules","犯罪ルール","逃走","逃走シーンのルール","- **逃走開始から5分間はアジト逃げ禁止**\n- **逃走開始から10分間は、盗品・押収品を車に収納する行為禁止**\n- **逃走シーン終了後は、犯罪で使用した服装以外に着替えること**","warning","犯罪者"],
+["white-citizen","職業・市民ルール","白市民・黒市民","白市民・黒市民について","武器ライセンスを所持している場合は白市民として扱います。\n\n黒市民は犯罪者を指します。","text","全住民"],
+["law-fines","警察ルール","法律・罰金","法律・罰金一覧","サーバー内ではRP上の法律が存在します。警察は法律に基づいて取り締まりを行い、市民はその場のRPとして対応してください。\n\n- 詐欺罪：60万円\n- 虚偽罪：50万円\n- 暴行罪：50万円\n- 威力業務妨害罪：300万円\n- 営業妨害罪：100万円（被害施設は0〜1億円の損害賠償を請求できる権利があります）\n- 公然わいせつ罪：250万円\n- 銃刀法違反：30万円\n- 窃盗罪：100万円\n- 重窃盗罪（公務員車両）：200万円\n- 違法薬物所持罪：20万円（1個単位）\n- 違法薬物素材所持罪：20万円（100個ごと）\n- 道路交通法違反：30万円\n- 逃走ほう助罪：150万円\n- 誘拐・拉致罪：50万円\n- 殺人罪：100万円\n- 公務執行妨害罪：50万円\n- 準小型犯罪：300万円\n- 小型犯罪：500万円\n- 中型犯罪：1,500万円\n- 準大型犯罪：2,000万円\n- 大型犯罪：3,000万円\n- 超大型犯罪：4,000万円\n- 本署襲撃罪：2,000万円\n- 本署テロ罪：2億円\n- テロ罪：3億円\n- イベントテロ罪：3億円\n\n**殺した場合は、プレイヤー・NPCを問わず殺人罪となります。**","card","全住民,警察"],
+["police-basic","警察ルール","警察の基本","警察について","警察は、市民を守る立場として常に節度ある行動を心がけてください。\n\n市民・犯罪者を問わず丁寧な言葉遣いで対応し、不明点や判断に迷う場合は**上官に確認してください。**","text","警察"],
+["police-fire","警察ルール","発砲・制圧","発砲基準","- 人質がいない場合、犯人が武器を所持していることを確認した時点で制圧行為が可能\n- 無抵抗の相手には、必ず警告を行ってから発砲すること\n- 小型犯罪は、犯人が警察に対して発砲した場合のみ発砲可能\n- 中型犯罪以上は即時発砲可能","card","警察"],
+["seizure","警察ルール","持ち物検査・押収","持ち物検査・押収","銃弾は押収対象外です。\n\n★マーク付きアイテムは、警察が押収対象として認識しているものです。\n\n犯罪に使用した物品、盗品、登録されていない武器、警察が危険と判断した物品などは押収される場合があります。\n\n押収機能を利用した物資共有、押収品の使用、押収権限の悪用は禁止です。","notice","警察"],
+["ems-basic","EMSルール","EMSの基本","救急隊について","救急隊は、倒れたプレイヤーの救助や医療RPを担当する職業です。\n\n救助対象には公平に対応し、医療RPを大切にしてください。救急隊権限を悪用してはいけません。\n\n**EMSは出勤・退勤を問わず犯罪行為は禁止です。**","card","EMS"],
+["ems-prohibited","EMSルール","禁止事項","救急隊の禁止事項","- 救急アイテムの横流し\n- 特定プレイヤーのみを優遇する行為\n- 犯罪者への不正な協力\n- 現場情報を外部へ漏らす行為\n- 救助RPを無視した機械的な蘇生のみ\n- 無償での蘇生や治療、AFAKの提供行為","card","EMS"],
+["company-setup","店舗・会社ルール","設立・開業","会社・店舗の設立","会社の設立には、市長面談により営業許可を受けた後、営業ライセンスを取得する必要があります。\n\n- 従業員3名以上\n- 設立費用：**￥30,000,000**\n- 既存MLOの利用可\n- MLOを新規導入する場合は、設立費用とは別に費用がかかります","card","店舗,会社"],
+["company-operation","店舗・会社ルール","営業・運営","店舗・会社の運営","店舗を運営する場合は、営業内容に合ったRPを行ってください。価格設定、販売物、営業日、接客方針など、ルールに記載のものを遵守してください。\n\n**業種以外の商品を取り扱う場合は、再度市との面談が必要です。**","text","店舗,会社"],
+["ticket","補填・トラブル対応・お問い合わせ","チケット・お問い合わせ","チケットについて","サーバー内で困ったこと、質問、報告、申請がある場合はチケットを使用してください。DMでの個別対応は原則行いません。\n\n状況が分かるように、発生日時・関係者・発生場所・内容などを記載してください。補填や違反報告では証拠が必要となり、**基本的に動画での提出**をお願いします。","text","全住民"],
+["violation-response","補填・トラブル対応・お問い合わせ","違反対応","違反対応について","ルール違反が確認された場合、内容に応じて注意、警告、一時的な制限、アイテム・金銭・権限の回収、職業・会社・ギャング権限の停止、一時BAN、永久BANなどの対応を行う場合があります。\n\n最終的な判断は運営が行います。ルールに明記されていない行為でも、サーバー運営に支障があると判断した場合は対応対象となります。","notice","全住民"],
+["admin-regulations","運営規約",null,"運営チーム内部規約","第1条（目的）\n本規約は、運営チームとして公平かつ円滑なサーバー運営を行うために必要な行動基準および遵守事項を定めることを目的とする。\n\n第2条（基本方針）\n1. 運営メンバーは、常に公平かつ中立な立場で対応しなければならない。\n2. 個人的な感情や人間関係によって対応内容を変更してはならない。\n3. サーバー全体の利益を優先し、運営として責任ある行動を取らなければならない。\n\n第3条（守秘義務）\n1. 運営活動を通じて知り得た内部情報、開発情報、個人情報その他の機密情報を、運営全体の許可なく第三者へ開示してはならない。\n2. 運営権限によって知り得た情報を私的な目的で利用してはならない。\n\n第4条（権限の行使）\n1. 運営権限は、サーバー運営に必要な範囲でのみ使用しなければならない。\n2. 権限を私的な目的や特定のプレイヤーを優遇または不利益に扱う目的で使用してはならない。\n3. テストを目的として権限を使用する場合は、運営チーム内で共有し、必要に応じて適切な環境で実施するものとする。\n4. 権限をロールプレイキャラクターで使用することは認められない。使用する場合は必ずキャラクターを変更して使用しなければならない。\n\n第5条（プレイヤー対応）\n1. プレイヤーへの対応は、常に冷静かつ丁寧に行わなければならない。\n2. 暴言、煽り、威圧的な発言その他運営として不適切な言動を行ってはならない。\n3. 問題が発生した場合は、事実確認を優先し、憶測や一方的な判断による対応を行ってはならない。\n\n第6条（運営内での連携）\n1. サーバー運営に重大な影響を及ぼす対応を行う場合は、可能な限り他の運営メンバーへ情報共有を行うものとする。\n2. 判断が困難な案件については、独断で対応せず、運営チーム内で協議を行うものとする。\n\n第7条（禁止事項）\n1. 権限の私的利用\n2. 内部情報の漏えい\n3. プレイヤーへの差別的対応\n4. 個人的な理由による処罰または優遇\n5. 運営権限を利用した利益の取得\n6. 他の運営メンバーの信用を不当に損なう行為\n7. サーバー運営に支障を及ぼす行為\n\n第8条（責任）\n運営メンバーは、自らの判断および行動に責任を負い、問題が発生した場合は速やかに運営チームへ報告しなければならない。\n\n第9条（規約違反）\n本規約に違反した場合は、その内容および重大性を考慮し、警告、権限の制限または剥奪、運営チームからの除名その他必要な措置を講じる場合がある。\n\n第10条（規約の改定）\n本規約は、サーバー運営上必要と判断した場合、運営責任者または管理者の判断により改定できるものとする。\n\n第11条（開発成果物の取扱い）","text","運営"]
+];
+async function seedInitialRules(db){
+ for(const r of INITIAL_RULES){const [sl,ma,mi,title,content,layout,tags]=r;const exists=await db.prepare("SELECT id FROM rules WHERE slug=? LIMIT 1").bind(sl).first();if(exists)continue;const [majorId,middleId]=await ensureSection(db,ma,mi);const so=await next(db,"rules",middleId?"WHERE middle_id=?":"WHERE middle_id IS NULL",middleId?[middleId]:[]);await db.prepare(`INSERT INTO rules(slug,category,title,summary,content,display_type,is_published,sort_order,keywords,details,details_collapsed,change_note,new_until,major_id,middle_id,is_required,edited_by,layout_type,tags,created_at,updated_at)VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(sl,ma,title,"",content,"normal",1,so,"","",1,"初期ルール追加",null,majorId,middleId,0,"初期データ",layout,tags).run()}
+}
+
+export default{async fetch(req,env){const u=new URL(req.url);await schema(env.DB);await seedInitialRules(env.DB);
+ if(u.pathname==="/api/public"){const [rr,aa,ff,ii,ss,hh,nn]=await Promise.all([
   env.DB.prepare(`SELECT r.*,ma.title major_title,ma.description major_description,ma.is_required major_required,mi.title middle_title,mi.description middle_description,mi.is_required middle_required FROM rules r LEFT JOIN rule_major_titles ma ON ma.id=r.major_id LEFT JOIN rule_middle_titles mi ON mi.id=r.middle_id WHERE r.is_published=1 AND r.retired_at IS NULL ORDER BY COALESCE(ma.sort_order,99999),COALESCE(mi.sort_order,99999),r.sort_order,r.id`).all(),
   env.DB.prepare(`SELECT * FROM announcements WHERE is_published=1 ORDER BY is_important DESC,sort_order,id DESC`).all(),
   env.DB.prepare(`SELECT * FROM faqs WHERE is_published=1 ORDER BY sort_order,id`).all(),
-  env.DB.prepare(`SELECT * FROM site_images WHERE is_published=1 ORDER BY slot,sort_order,id`).all(),settings(env.DB)]);
-  return J({ok:true,rules:rr.results||[],announcements:aa.results||[],faqs:ff.results||[],images:ii.results||[],settings:ss})
+  env.DB.prepare(`SELECT * FROM site_images WHERE is_published=1 ORDER BY slot,sort_order,id`).all(),settings(env.DB),
+  env.DB.prepare(`SELECT rule_id,title,change_note,edited_by,saved_at FROM rule_history WHERE saved_at>=datetime('now','-60 days') ORDER BY saved_at DESC,id DESC LIMIT 80`).all(),
+  env.DB.prepare(`SELECT r.id rule_id,r.title,r.created_at saved_at,r.edited_by,ma.title major_title,mi.title middle_title FROM rules r LEFT JOIN rule_major_titles ma ON ma.id=r.major_id LEFT JOIN rule_middle_titles mi ON mi.id=r.middle_id WHERE r.created_at>=datetime('now','-60 days') ORDER BY r.created_at DESC,r.id DESC LIMIT 50`).all()]);
+  const updates=[...(nn.results||[]).map(x=>({...x,action:"追加",change_note:"新しいルールを追加しました。"})),...(hh.results||[]).map(x=>({...x,action:S(x.change_note).trim()==="廃止"?"廃止":"変更"}))].sort((a,b)=>S(b.saved_at).localeCompare(S(a.saved_at))).slice(0,5);
+  return J({ok:true,rules:rr.results||[],announcements:aa.results||[],faqs:ff.results||[],images:ii.results||[],settings:ss,rule_updates:updates})
  }
  if(u.pathname.startsWith("/media/")){if(!env.IMAGES)return new Response("Not configured",{status:404});const key=decodeURIComponent(u.pathname.slice(7)),o=await env.IMAGES.get(key);if(!o)return new Response("Not found",{status:404});const h=new Headers();o.writeHttpMetadata(h);h.set("etag",o.httpEtag);h.set("cache-control","public,max-age=86400");return new Response(o.body,{headers:h})}
  if(u.pathname==="/api/admin/check"){if(!admin(req,env))return J({ok:false,message:"Unauthorized"},401);return J({ok:true,r2:!!env.IMAGES})}
  if(!u.pathname.startsWith("/api/admin/"))return env.ASSETS.fetch(req);
  if(!admin(req,env))return J({ok:false,message:"Unauthorized"},401);const ed=editor(req);
  if(u.pathname==="/api/admin/dashboard"){const q=async(sql)=>+(await env.DB.prepare(sql).first())?.n||0;return J({ok:true,counts:{rules:await q("SELECT COUNT(*) n FROM rules WHERE retired_at IS NULL"),published:await q("SELECT COUNT(*) n FROM rules WHERE is_published=1 AND retired_at IS NULL"),announcements:await q("SELECT COUNT(*) n FROM announcements"),faqs:await q("SELECT COUNT(*) n FROM faqs"),images:await q("SELECT COUNT(*) n FROM site_images")},r2:!!env.IMAGES})}
- if(u.pathname==="/api/admin/rules/reset-official"&&req.method==="POST"){const counts=await resetOfficialRules(env.DB,ed);return J({ok:true,...counts})}
  if(u.pathname==="/api/admin/majors"&&req.method==="GET"){const r=await env.DB.prepare("SELECT * FROM rule_major_titles ORDER BY sort_order,id").all();return J({ok:true,majors:r.results||[]})}
  if(u.pathname==="/api/admin/majors"&&req.method==="POST"){const b=await req.json(),t=S(b.title).trim();if(!t)return J({ok:false},400);const n=await next(env.DB,"rule_major_titles"),r=await env.DB.prepare("INSERT INTO rule_major_titles(title,description,is_required,sort_order,edited_by)VALUES(?,?,?,?,?)").bind(t,S(b.description),b.is_required?1:0,n,ed).run();return J({ok:true,id:r.meta.last_row_id})}
  let m=u.pathname.match(/^\/api\/admin\/majors\/(\d+)$/);if(m&&req.method==="PUT"){const b=await req.json();await env.DB.prepare("UPDATE rule_major_titles SET title=?,description=?,is_required=?,edited_by=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(S(b.title).trim(),S(b.description),b.is_required?1:0,ed,+m[1]).run();return J({ok:true})}
@@ -80,7 +127,8 @@ export default{async fetch(req,env){const u=new URL(req.url);await schema(env.DB
  m=u.pathname.match(/^\/api\/admin\/rules\/(\d+)\/move$/);if(m){const b=await req.json();await move(env.DB,"rules",+m[1],b.direction,"middle_id");return J({ok:true})}
  m=u.pathname.match(/^\/api\/admin\/rules\/(\d+)\/retire$/);if(m){const id=+m[1],r=await env.DB.prepare("SELECT * FROM rules WHERE id=?").bind(id).first();await hist(env.DB,r,"廃止",ed);await env.DB.prepare("UPDATE rules SET is_published=0,retired_at=CURRENT_TIMESTAMP,edited_by=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(ed,id).run();return J({ok:true})}
  m=u.pathname.match(/^\/api\/admin\/rules\/(\d+)\/restore$/);if(m){await env.DB.prepare("UPDATE rules SET retired_at=NULL,is_published=0,edited_by=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(ed,+m[1]).run();return J({ok:true})}
- m=u.pathname.match(/^\/api\/admin\/rules\/(\d+)\/hard-delete$/);if(m&&req.method==="DELETE"){const r=await env.DB.prepare("SELECT * FROM rules WHERE id=?").bind(+m[1]).first();if(!r?.retired_at)return J({ok:false},400);await env.DB.batch([env.DB.prepare("DELETE FROM rule_history WHERE rule_id=?").bind(+m[1]),env.DB.prepare("DELETE FROM rules WHERE id=?").bind(+m[1])]);return J({ok:true})}
+ if(u.pathname==="/api/admin/rules/delete-selected"&&req.method==="DELETE"){const b=await req.json().catch(()=>({})),ids=[...new Set((Array.isArray(b.ids)?b.ids:[]).map(Number).filter(Number.isInteger).filter(x=>x>0))].slice(0,500);if(!ids.length)return J({ok:false,message:"削除するルールが選択されていません。"},400);const marks=ids.map(()=>"?").join(",");await env.DB.batch([env.DB.prepare(`DELETE FROM rule_history WHERE rule_id IN (${marks})`).bind(...ids),env.DB.prepare(`DELETE FROM rules WHERE id IN (${marks})`).bind(...ids)]);return J({ok:true,deleted:ids.length})}
+ m=u.pathname.match(/^\/api\/admin\/rules\/(\d+)\/hard-delete$/);if(m&&req.method==="DELETE"){const id=+m[1];await env.DB.batch([env.DB.prepare("DELETE FROM rule_history WHERE rule_id=?").bind(id),env.DB.prepare("DELETE FROM rules WHERE id=?").bind(id)]);return J({ok:true})}
  m=u.pathname.match(/^\/api\/admin\/history\/(\d+)$/);if(m){const r=await env.DB.prepare("SELECT * FROM rule_history WHERE rule_id=? ORDER BY id DESC LIMIT 50").bind(+m[1]).all();return J({ok:true,history:r.results||[]})}
  if(u.pathname==="/api/admin/announcements"&&req.method==="GET"){const r=await env.DB.prepare("SELECT * FROM announcements ORDER BY sort_order,id DESC").all();return J({ok:true,items:r.results||[]})}
  if(u.pathname==="/api/admin/announcements"&&req.method==="POST"){const b=await req.json(),n=await next(env.DB,"announcements"),r=await env.DB.prepare("INSERT INTO announcements(title,body,tag,is_important,is_published,image_key,sort_order,published_at,edited_by)VALUES(?,?,?,?,?,?,?,?,?)").bind(S(b.title),S(b.body),S(b.tag)||"NEWS",b.is_important?1:0,b.is_published?1:0,S(b.image_key),n,b.is_published?new Date().toISOString():null,ed).run();return J({ok:true,id:r.meta.last_row_id})}
