@@ -27,15 +27,13 @@ function ext(type){return({"image/jpeg":"jpg","image/png":"png","image/webp":"we
 const OFFICIAL_RULE_STRUCTURE=[
  ["はじめに",["North Cityについて","初心者向け","用語について"]],
  ["基本ルール",["禁止事項","RP上の禁止事項","メタ・外部情報","配信・録画","不正行為・外部ツール","アイテム・車両・施設","バグ・不具合"]],
- ["職業・市民ルール",["ジョブ共通ルール","Job・兼業","オーナー・サブオーナー","違反ポイント","白市民・黒市民"]],
+ ["職業・市民ルール",["ジョブ共通ルール","Job・兼業","オーナー・サブオーナー","違反ポイント","白市民・黒市民","武器ライセンス"]],
  ["犯罪ルール",["犯罪の基本","犯罪区分","犯罪シーン","人質","逃走","指名手配","歪み・再起動"]],
  ["警察ルール",["警察の基本","発砲・制圧","法律・罰金","持ち物検査・押収","車両・装備","警察側の援護射撃","犯罪収束後","市民への補償","警察内部"]],
- ["EMSルール",["EMSの基本","救助・医療","犯罪現場","禁止事項","EMSへの妨害"]],
- ["メカニックルール",["メカニックの基本","開業・運営","業務・修理","禁止事項","閉業・営業停止"]],
+ ["EMSルール",["EMSの基本","救助・医療","犯罪現場","禁止事項","EMSへの妨害","料金"]],
+ ["メカニックルール",["メカニックの基本","開業・運営","業務・修理","禁止事項","閉業・営業停止","料金"]],
  ["店舗・会社ルール",["店舗・会社の基本","設立・開業","営業・運営","禁止事項","責任・閉業"]],
  ["ギャング・組織ルール",["組織の基本","ギャング","その他犯罪組織","組織への加入・脱退","組織間の行動","抗争","組織の禁止事項"]],
- ["ライセンス",["武器ライセンス","営業ライセンス"]],
- ["料金",["EMS料金","店舗・会社関連費用","メカニック関連費用","その他行政料金"]],
  ["補填・トラブル対応・お問い合わせ",["チケット・お問い合わせ","補填","違反報告・トラブル","違反対応"]],
  ["運営規約",[]]
 ]
@@ -93,11 +91,41 @@ const INITIAL_RULES=[
 ["violation-response","補填・トラブル対応・お問い合わせ","違反対応","違反対応について","ルール違反が確認された場合、内容に応じて注意、警告、一時的な制限、アイテム・金銭・権限の回収、職業・会社・ギャング権限の停止、一時BAN、永久BANなどの対応を行う場合があります。\n\n最終的な判断は運営が行います。ルールに明記されていない行為でも、サーバー運営に支障があると判断した場合は対応対象となります。","notice","全住民"],
 ["admin-regulations","運営規約",null,"運営チーム内部規約","第1条（目的）\n本規約は、運営チームとして公平かつ円滑なサーバー運営を行うために必要な行動基準および遵守事項を定めることを目的とする。\n\n第2条（基本方針）\n1. 運営メンバーは、常に公平かつ中立な立場で対応しなければならない。\n2. 個人的な感情や人間関係によって対応内容を変更してはならない。\n3. サーバー全体の利益を優先し、運営として責任ある行動を取らなければならない。\n\n第3条（守秘義務）\n1. 運営活動を通じて知り得た内部情報、開発情報、個人情報その他の機密情報を、運営全体の許可なく第三者へ開示してはならない。\n2. 運営権限によって知り得た情報を私的な目的で利用してはならない。\n\n第4条（権限の行使）\n1. 運営権限は、サーバー運営に必要な範囲でのみ使用しなければならない。\n2. 権限を私的な目的や特定のプレイヤーを優遇または不利益に扱う目的で使用してはならない。\n3. テストを目的として権限を使用する場合は、運営チーム内で共有し、必要に応じて適切な環境で実施するものとする。\n4. 権限をロールプレイキャラクターで使用することは認められない。使用する場合は必ずキャラクターを変更して使用しなければならない。\n\n第5条（プレイヤー対応）\n1. プレイヤーへの対応は、常に冷静かつ丁寧に行わなければならない。\n2. 暴言、煽り、威圧的な発言その他運営として不適切な言動を行ってはならない。\n3. 問題が発生した場合は、事実確認を優先し、憶測や一方的な判断による対応を行ってはならない。\n\n第6条（運営内での連携）\n1. サーバー運営に重大な影響を及ぼす対応を行う場合は、可能な限り他の運営メンバーへ情報共有を行うものとする。\n2. 判断が困難な案件については、独断で対応せず、運営チーム内で協議を行うものとする。\n\n第7条（禁止事項）\n1. 権限の私的利用\n2. 内部情報の漏えい\n3. プレイヤーへの差別的対応\n4. 個人的な理由による処罰または優遇\n5. 運営権限を利用した利益の取得\n6. 他の運営メンバーの信用を不当に損なう行為\n7. サーバー運営に支障を及ぼす行為\n\n第8条（責任）\n運営メンバーは、自らの判断および行動に責任を負い、問題が発生した場合は速やかに運営チームへ報告しなければならない。\n\n第9条（規約違反）\n本規約に違反した場合は、その内容および重大性を考慮し、警告、権限の制限または剥奪、運営チームからの除名その他必要な措置を講じる場合がある。\n\n第10条（規約の改定）\n本規約は、サーバー運営上必要と判断した場合、運営責任者または管理者の判断により改定できるものとする。\n\n第11条（開発成果物の取扱い）","text","運営"]
 ];
+async function normalizeOfficialStructure(db){
+ // Ensure the 11 current major titles exist and keep this exact default order.
+ const ids={};
+ for(let i=0;i<OFFICIAL_RULE_STRUCTURE.length;i++){
+  const title=OFFICIAL_RULE_STRUCTURE[i][0];
+  let ma=await db.prepare("SELECT id FROM rule_major_titles WHERE title=? ORDER BY id LIMIT 1").bind(title).first();
+  if(!ma){const r=await db.prepare("INSERT INTO rule_major_titles(title,sort_order,edited_by)VALUES(?,?,?)").bind(title,i,"構成更新").run();ma={id:r.meta.last_row_id}}
+  ids[title]=ma.id;
+  await db.prepare("UPDATE rule_major_titles SET sort_order=? WHERE id=?").bind(i,ma.id).run();
+ }
+ async function targetMiddle(major,title){
+  let mi=await db.prepare("SELECT id FROM rule_middle_titles WHERE major_id=? AND title=? ORDER BY id LIMIT 1").bind(ids[major],title).first();
+  if(!mi){const so=await next(db,"rule_middle_titles","WHERE major_id=?",[ids[major]]);const r=await db.prepare("INSERT INTO rule_middle_titles(major_id,title,sort_order,edited_by)VALUES(?,?,?,?)").bind(ids[major],title,so,"構成更新").run();mi={id:r.meta.last_row_id}}
+  return mi.id;
+ }
+ const oldLic=await db.prepare("SELECT id FROM rule_major_titles WHERE title='ライセンス'").first();
+ if(oldLic){
+  const mids=await db.prepare("SELECT * FROM rule_middle_titles WHERE major_id=? ORDER BY sort_order,id").bind(oldLic.id).all();
+  for(const mi of mids.results||[]){const dst=mi.title.includes("営業")?await targetMiddle("店舗・会社ルール","設立・開業"):await targetMiddle("職業・市民ルール","武器ライセンス");await db.prepare("UPDATE rules SET major_id=?,middle_id=? WHERE major_id=? AND middle_id=?").bind(mi.title.includes("営業")?ids["店舗・会社ルール"]:ids["職業・市民ルール"],dst,oldLic.id,mi.id).run()}
+  await db.prepare("UPDATE rules SET major_id=?,middle_id=? WHERE major_id=? AND middle_id IS NULL").bind(ids["職業・市民ルール"],await targetMiddle("職業・市民ルール","武器ライセンス"),oldLic.id).run();
+  await db.prepare("DELETE FROM rule_middle_titles WHERE major_id=?").bind(oldLic.id).run();await db.prepare("DELETE FROM rule_major_titles WHERE id=?").bind(oldLic.id).run();
+ }
+ const oldFee=await db.prepare("SELECT id FROM rule_major_titles WHERE title='料金'").first();
+ if(oldFee){
+  const mids=await db.prepare("SELECT * FROM rule_middle_titles WHERE major_id=? ORDER BY sort_order,id").bind(oldFee.id).all();
+  for(const mi of mids.results||[]){let ma="職業・市民ルール",mt="ジョブ共通ルール";if(mi.title.includes("EMS")){ma="EMSルール";mt="料金"}else if(mi.title.includes("メカニック")){ma="メカニックルール";mt="料金"}else if(mi.title.includes("店舗")||mi.title.includes("会社")){ma="店舗・会社ルール";mt="設立・開業"}const dst=await targetMiddle(ma,mt);await db.prepare("UPDATE rules SET major_id=?,middle_id=? WHERE major_id=? AND middle_id=?").bind(ids[ma],dst,oldFee.id,mi.id).run()}
+  const dst=await targetMiddle("職業・市民ルール","ジョブ共通ルール");await db.prepare("UPDATE rules SET major_id=?,middle_id=? WHERE major_id=? AND middle_id IS NULL").bind(ids["職業・市民ルール"],dst,oldFee.id).run();
+  await db.prepare("DELETE FROM rule_middle_titles WHERE major_id=?").bind(oldFee.id).run();await db.prepare("DELETE FROM rule_major_titles WHERE id=?").bind(oldFee.id).run();
+ }
+}
 async function seedInitialRules(db){
  for(const r of INITIAL_RULES){const [sl,ma,mi,title,content,layout,tags]=r;const exists=await db.prepare("SELECT id FROM rules WHERE slug=? LIMIT 1").bind(sl).first();if(exists)continue;const [majorId,middleId]=await ensureSection(db,ma,mi);const so=await next(db,"rules",middleId?"WHERE middle_id=?":"WHERE middle_id IS NULL",middleId?[middleId]:[]);await db.prepare(`INSERT INTO rules(slug,category,title,summary,content,display_type,is_published,sort_order,keywords,details,details_collapsed,change_note,new_until,major_id,middle_id,is_required,edited_by,layout_type,tags,created_at,updated_at)VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(sl,ma,title,"",content,"normal",1,so,"","",1,"初期ルール追加",null,majorId,middleId,0,"初期データ",layout,tags).run()}
 }
 
-export default{async fetch(req,env){const u=new URL(req.url);await schema(env.DB);await seedInitialRules(env.DB);
+export default{async fetch(req,env){const u=new URL(req.url);await schema(env.DB);await normalizeOfficialStructure(env.DB);await seedInitialRules(env.DB);
  if(u.pathname==="/api/public"){const [rr,aa,ff,ii,ss,hh,nn]=await Promise.all([
   env.DB.prepare(`SELECT r.*,ma.title major_title,ma.description major_description,ma.is_required major_required,mi.title middle_title,mi.description middle_description,mi.is_required middle_required FROM rules r LEFT JOIN rule_major_titles ma ON ma.id=r.major_id LEFT JOIN rule_middle_titles mi ON mi.id=r.middle_id WHERE r.is_published=1 AND r.retired_at IS NULL ORDER BY COALESCE(ma.sort_order,99999),COALESCE(mi.sort_order,99999),r.sort_order,r.id`).all(),
   env.DB.prepare(`SELECT * FROM announcements WHERE is_published=1 ORDER BY is_important DESC,sort_order,id DESC`).all(),
