@@ -24,6 +24,34 @@ async function uniq(db,s,t,except=null){let b=S(s).trim()||slug(t),c=b,n=2;while
 async function hist(db,r,n,e){if(r)await db.prepare(`INSERT INTO rule_history(rule_id,title,category,summary,content,details,display_type,is_published,change_note,edited_by)VALUES(?,?,?,?,?,?,?,?,?,?)`).bind(r.id,r.title||"",r.category||"",r.summary||"",r.content||"",r.details||"",r.display_type||"normal",r.is_published??1,n||"",e).run()}
 async function settings(db){const r=await db.prepare("SELECT key,value FROM site_settings").all();return Object.fromEntries((r.results||[]).map(x=>[x.key,x.value]))}
 function ext(type){return({"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif"}[type]||"")}
+const OFFICIAL_RULE_STRUCTURE=[
+ ["はじめに",["North Cityについて","初心者向け","参加について","RP・ルールについて","用語について"]],
+ ["基本ルール",["禁止事項","RP上の禁止事項","メタ・外部情報","配信・録画","不正行為・外部ツール","アイテム・車両・施設","バグ・不具合"]],
+ ["職業・市民ルール",["ジョブ共通ルール","Job・兼業","オーナー・サブオーナー","違反ポイント","白市民・黒市民"]],
+ ["犯罪ルール",["犯罪の基本","犯罪区分","犯罪シーン","犯罪中の行動","人質・第三者","逃走","犯罪終了後・指名手配","歪み・再起動"]],
+ ["警察ルール",["警察の基本","発砲・制圧","犯罪対応","法律・罰金","持ち物検査・押収","車両・装備","犯罪収束後","市民への補償","警察内部"]],
+ ["EMSルール",["EMSの基本","救助・医療","犯罪・事件対応","禁止事項","EMSへの妨害","料金・請求"]],
+ ["メカニックルール",["メカニックの基本","開業・運営","勤務・職務","修理・カスタム","料金・請求","犯罪・事件時の対応","職務上の制限"]],
+ ["店舗・会社ルール",["店舗・会社の基本","設立・開業","営業・運営","禁止事項","責任・閉業"]],
+ ["ギャング・組織ルール",["組織の基本","設立・所属","組織活動","アジト","組織間の関係","抗争","脱退・移籍"]],
+ ["補填・トラブル対応・お問い合わせ",["チケット・お問い合わせ","補填","録画・証拠","歪み・不具合","トラブル・違反報告","違反対応"]],
+ ["運営規約",[]]
+];
+async function resetOfficialRules(db,ed){
+ await db.batch([
+  db.prepare("DELETE FROM rule_history"),
+  db.prepare("DELETE FROM rules"),
+  db.prepare("DELETE FROM rule_middle_titles"),
+  db.prepare("DELETE FROM rule_major_titles")
+ ]);
+ for(let i=0;i<OFFICIAL_RULE_STRUCTURE.length;i++){
+  const [title,middles]=OFFICIAL_RULE_STRUCTURE[i];
+  const r=await db.prepare("INSERT INTO rule_major_titles(title,description,is_required,sort_order,edited_by) VALUES(?,?,?,?,?)").bind(title,"",0,i,ed).run();
+  const majorId=r.meta.last_row_id;
+  for(let j=0;j<middles.length;j++)await db.prepare("INSERT INTO rule_middle_titles(major_id,title,description,is_required,sort_order,edited_by) VALUES(?,?,?,?,?,?)").bind(majorId,middles[j],"",0,j,ed).run();
+ }
+ return {majors:OFFICIAL_RULE_STRUCTURE.length,middles:OFFICIAL_RULE_STRUCTURE.reduce((n,x)=>n+x[1].length,0)};
+}
 export default{async fetch(req,env){const u=new URL(req.url);await schema(env.DB);
  if(u.pathname==="/api/public"){const [rr,aa,ff,ii,ss]=await Promise.all([
   env.DB.prepare(`SELECT r.*,ma.title major_title,ma.description major_description,ma.is_required major_required,mi.title middle_title,mi.description middle_description,mi.is_required middle_required FROM rules r LEFT JOIN rule_major_titles ma ON ma.id=r.major_id LEFT JOIN rule_middle_titles mi ON mi.id=r.middle_id WHERE r.is_published=1 AND r.retired_at IS NULL ORDER BY COALESCE(ma.sort_order,99999),COALESCE(mi.sort_order,99999),r.sort_order,r.id`).all(),
@@ -37,6 +65,7 @@ export default{async fetch(req,env){const u=new URL(req.url);await schema(env.DB
  if(!u.pathname.startsWith("/api/admin/"))return env.ASSETS.fetch(req);
  if(!admin(req,env))return J({ok:false,message:"Unauthorized"},401);const ed=editor(req);
  if(u.pathname==="/api/admin/dashboard"){const q=async(sql)=>+(await env.DB.prepare(sql).first())?.n||0;return J({ok:true,counts:{rules:await q("SELECT COUNT(*) n FROM rules WHERE retired_at IS NULL"),published:await q("SELECT COUNT(*) n FROM rules WHERE is_published=1 AND retired_at IS NULL"),announcements:await q("SELECT COUNT(*) n FROM announcements"),faqs:await q("SELECT COUNT(*) n FROM faqs"),images:await q("SELECT COUNT(*) n FROM site_images")},r2:!!env.IMAGES})}
+ if(u.pathname==="/api/admin/rules/reset-official"&&req.method==="POST"){const counts=await resetOfficialRules(env.DB,ed);return J({ok:true,...counts})}
  if(u.pathname==="/api/admin/majors"&&req.method==="GET"){const r=await env.DB.prepare("SELECT * FROM rule_major_titles ORDER BY sort_order,id").all();return J({ok:true,majors:r.results||[]})}
  if(u.pathname==="/api/admin/majors"&&req.method==="POST"){const b=await req.json(),t=S(b.title).trim();if(!t)return J({ok:false},400);const n=await next(env.DB,"rule_major_titles"),r=await env.DB.prepare("INSERT INTO rule_major_titles(title,description,is_required,sort_order,edited_by)VALUES(?,?,?,?,?)").bind(t,S(b.description),b.is_required?1:0,n,ed).run();return J({ok:true,id:r.meta.last_row_id})}
  let m=u.pathname.match(/^\/api\/admin\/majors\/(\d+)$/);if(m&&req.method==="PUT"){const b=await req.json();await env.DB.prepare("UPDATE rule_major_titles SET title=?,description=?,is_required=?,edited_by=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(S(b.title).trim(),S(b.description),b.is_required?1:0,ed,+m[1]).run();return J({ok:true})}
