@@ -723,3 +723,11 @@ body.rulebook-open { overflow:hidden !important; }
   .rule-table-card-grid{grid-template-columns:1fr}
   .rule-table-pair:nth-child(odd){border-right:0}
 }
+
+/* 2026-08-16: mobile rule table single-value rows use full width */
+@media(max-width:760px){
+  .rule-table-card-grid .rule-table-pair:only-child{
+    grid-column:1 / -1;
+    border-right:0;
+  }
+}
