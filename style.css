@@ -731,3 +731,7 @@ body.rulebook-open { overflow:hidden !important; }
     border-right:0;
   }
 }
+
+/* Gallery title captions */
+.gallery-item{position:relative;overflow:hidden}
+.gallery-title{position:absolute;left:0;right:0;bottom:0;padding:12px 14px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff;font-weight:800;text-align:left;padding-top:34px;pointer-events:none}
